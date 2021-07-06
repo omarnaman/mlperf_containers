@@ -1,0 +1,10 @@
+schema_type: mlcube_invoke
+schema_version: 1.0.0
+
+task_name: serve
+
+input_binding: 
+      model: $WORKSPACE/onnx_ssd/model_out
+      runtime: $WORKSPACE/onnx_ssd/runtime_out
+
+output_binding: {}

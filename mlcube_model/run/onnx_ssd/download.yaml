@@ -1,0 +1,12 @@
+schema_type: mlcube_invoke
+schema_version: 1.0.0
+
+task_name: download
+
+input_binding: 
+      model: $WORKSPACE/onnx_ssd/model
+      runtime: $WORKSPACE/onnx_ssd/runtime
+
+output_binding: 
+      model_out: $WORKSPACE/onnx_ssd/model_out
+      runtime_out: $WORKSPACE/onnx_ssd/runtime_out

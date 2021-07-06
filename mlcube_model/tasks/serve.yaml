@@ -1,0 +1,15 @@
+# Schema
+schema_version: 1.0.0
+schema_type: mlcube_task
+
+# Task Inputs
+inputs:
+        - name: runtime
+          type: file
+
+        - name: model
+          type: file 
+
+# Task Outputs
+outputs: []
+        
