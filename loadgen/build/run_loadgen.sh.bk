@@ -1,0 +1,51 @@
+sut=$1;
+output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet
+shift 1;
+python3 python/py_loadgen/main.py \
+ --backend onnxruntime \
+ --model-name ssd-mobilenet \
+ --profile ssd-mobilenet-onnxruntime \
+ --output $output \
+ --dataset-path python/coco_300 \
+ --mlperf_conf mlperf.conf \
+ --max-batchsize 8 \
+ --address $sut \
+ --threads 8 \
+ --scenario SingleStream --time 20 \
+ $@ && \
+\
+cat "$output"/results.json | sed "s;\(\".*\)\(\.\)\(.*\"\);\1_\3;" > results.json && \
+curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_SingleStream_8per.json
+
+python3 python/py_loadgen/main.py \
+ --backend onnxruntime \
+ --model-name ssd-mobilenet \
+ --profile ssd-mobilenet-onnxruntime \
+ --output $output \
+ --dataset-path python/coco_300 \
+ --mlperf_conf mlperf.conf \
+ --max-batchsize 2 \
+ --address $sut \
+ --threads 8 \
+ --scenario SingleStream --time 20 \
+ $@ && \
+\
+cat "$output"/results.json | sed "s;\(\".*\)\(\.\)\(.*\"\);\1_\3;" > results.json && \
+curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_SingleStream_2per.json
+
+python3 python/py_loadgen/main.py \
+ --backend onnxruntime \
+ --model-name ssd-mobilenet \
+ --profile ssd-mobilenet-onnxruntime \
+ --output $output \
+ --dataset-path python/coco_300 \
+ --mlperf_conf mlperf.conf \
+ --max-batchsize 8 \
+ --address $sut \
+ --threads 8 \
+ --scenario Offline --count 100 \
+ $@ && \
+\
+cat "$output"/results.json | sed "s;\(\".*\)\(\.\)\(.*\"\);\1_\3;" > results.json && \
+curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_Offline.json
+

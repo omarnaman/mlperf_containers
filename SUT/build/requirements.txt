@@ -1,0 +1,4 @@
+onnxruntime
+grpcio
+requests
+tqdm
