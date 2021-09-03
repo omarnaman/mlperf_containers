@@ -51,4 +51,4 @@ RUN cd /workspace/loadgen/build/python/tools && \
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build
-ENTRYPOINT ["bash", "./run_loadgen.sh", "sut:8086"]
+ENTRYPOINT ["bash", "./run_loadgen.sh"]
