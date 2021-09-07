@@ -1,3 +1,40 @@
+DELAY=""
+BANDWIDTH=""
+function getTCArgs () {
+    echo $#
+    NONTC=()
+    while [[ $# -gt 0 ]]; do
+        key="$1"
+        TC=0
+        case $key in
+            --tc)
+            TC=1
+            shift
+            ;;
+            -d|--tc_delay)
+            DELAY="$2"
+            shift 
+            shift 
+            ;;
+            -b|--tc_bandwidth)
+            BANDWIDTH="$2"
+            shift
+            shift
+            ;;
+            *)    # unknown option
+            NONTC+=("$1") # save it in an array for later
+            shift # past argument
+            ;;
+        esac
+    done
+}
+getTCArgs $@
+
+if [[ $TC == 1 ]]; then
+    ./setup_tc.sh
+fi
+
+set -- ${NONTC}
 sut=$1;
 name=$2;
 output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet

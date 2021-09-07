@@ -18,8 +18,10 @@ RUN apt-get update && \
             build-essential \ 
             unzip zip \
             sed \
-            curl
-
+            curl \
+            iproute2 \
+            net-tools
+            
 RUN rm -rf /var/lib/apt/lists/*
 
 
