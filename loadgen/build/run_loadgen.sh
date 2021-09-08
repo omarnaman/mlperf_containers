@@ -33,7 +33,8 @@ if [[ $TC == 1 ]]; then
     ./setup_tc.sh
 fi
 
-set -- ${NONTC}
+
+set -- ${NONTC[@]}
 sut=$1;
 name=$2;
 output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet
