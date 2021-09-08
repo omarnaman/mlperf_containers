@@ -1,7 +1,6 @@
 DELAY=""
 BANDWIDTH=""
 function getTCArgs () {
-    echo $#
     NONTC=()
     while [[ $# -gt 0 ]]; do
         key="$1"
