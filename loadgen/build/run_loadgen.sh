@@ -29,8 +29,8 @@ function getTCArgs () {
 }
 getTCArgs $@
 
-if [[ $TC == 1 ]]; then
-    ./setup_tc.sh
+if [ $TC -eq 1 ]; then
+    source ./setup_tc.sh
 fi
 
 
