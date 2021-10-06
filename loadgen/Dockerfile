@@ -24,8 +24,6 @@ RUN apt-get update && \
             
 RUN rm -rf /var/lib/apt/lists/*
 
-
-COPY build /workspace/loadgen/build/
 COPY requirements.txt /requirements.txt
 
 # install pip packages
