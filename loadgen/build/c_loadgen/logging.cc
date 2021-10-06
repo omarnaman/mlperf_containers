@@ -340,7 +340,15 @@ void AsyncLog::RecordSampleCompletion(uint64_t sample_sequence_id,
                                       PerfClock::time_point completion_time,
                                       QuerySampleLatency latency) {
   std::unique_lock<std::mutex> lock(latencies_mutex_);
-
+  if (missed_deadline)
+  {
+    deadlines_missed_ ++;
+    if (AllLatenciesRecorded()) {
+      all_latencies_recorded_.notify_all();
+    }
+    return;
+  }
+  
   max_latency_ = std::max(max_latency_, latency);
 
   max_completion_timstamp_ =
@@ -420,9 +428,12 @@ std::vector<QuerySampleLatency> AsyncLog::GetLatenciesBlocking(
   }
 
   size_t invalid_latency_count = 0;
-  for (auto l : latencies) {
-    if (l == kInvalidLatency) {
+  for (auto l = latencies.begin(); l != latencies.end();) {
+    if (*l == kInvalidLatency) {
+      latencies.erase(l);
       invalid_latency_count++;
+    } else {
+      l++;
     }
   }
   if (invalid_latency_count != 0) {

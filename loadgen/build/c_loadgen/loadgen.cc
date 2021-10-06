@@ -87,7 +87,8 @@ struct ResponseDelegateDetailed : public ResponseDelegate {
       uint8_t* src_end = src_begin + response->size;
       sample_data_copy = new std::vector<uint8_t>(src_begin, src_end);
     }
-    Log([sample, complete_begin_time, sample_data_copy](AsyncLog& log) {
+    bool deadline_missed = (response->size == std::numeric_limits<size_t>::max())? true: false;
+    Log([sample, complete_begin_time, sample_data_copy, deadline_missed](AsyncLog& log) {
       QueryMetadata* query = sample->query_metadata;
       DurationGeneratorNs sched{query->scheduled_time};
 
@@ -119,7 +120,7 @@ struct ResponseDelegateDetailed : public ResponseDelegate {
       // thread and potentially destroy the metadata being used above.
       QuerySampleLatency latency = sched.delta(complete_begin_time);
       log.RecordSampleCompletion(sample->sequence_id, complete_begin_time,
-                                 latency);
+                                 latency, deadline_missed);
     });
   }
 

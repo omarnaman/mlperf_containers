@@ -11,6 +11,8 @@ import grpc
 
 import socket
 import pickle
+# TODO: remove dependency
+import cli_colors
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +37,7 @@ class RunnerBase:
     batches = 0
     samples = 0
 
-    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128):
+    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128, timeout=1):
         self.take_accuracy = False
         self.ds = ds
         self.model = model
@@ -44,6 +46,7 @@ class RunnerBase:
         self.take_accuracy = False
         self.max_batchsize = max_batchsize
         self.result_timing = []
+        self.timeout = timeout
 
     def handle_tasks(self, tasks_queue):
         pass
@@ -83,7 +86,11 @@ class RunnerBase:
                 response_array = array.array("B", np.array(processed_results[idx], np.float32).tobytes())
                 response_array_refs.append(response_array)
                 bi = response_array.buffer_info()
-                response.append(lg.QuerySampleResponse(query_id, bi[0], bi[1]))
+                # request timeout
+                if len(processed_results[idx]) > 0 and processed_results[idx][0] == -1:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], lg.InvalidSize()))
+                else:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], bi[1]))
             lg.QuerySamplesComplete(response)
 
     def enqueue(self, query_samples):
@@ -175,14 +182,20 @@ class RemoteRunnerBase(RunnerBase):
         item_pickle = pickle.dumps(qitem.img)
         p1 = time.time()
         request = basic_pb2.RequestItem(items=item_pickle)
-        response: basic_pb2.ItemResult = self.stub.InferenceItem(request)
-        p2 = time.time()
-        result, time_taken = pickle.loads(response.results)
-        e = time.time()
-        self.time_taken.append(time_taken)
-        self.coms.append(p2 - p1 - time_taken)
-        self.pickling.append((p1 - s, e - p2))
-        return result
+        try:
+            response: basic_pb2.ItemResult = self.stub.InferenceItem(request, timeout = self.timeout) 
+            p2 = time.time()
+            result, time_taken = pickle.loads(response.results)
+            e = time.time()
+            self.time_taken.append(time_taken)
+            self.coms.append(p2 - p1 - time_taken)
+            self.pickling.append((p1 - s, e - p2))
+            return result
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                cli_colors.color_print(f"gRPC Error: {e.code()}", cli_colors.MAGENTA)
+                return [None]*len(qitem.img)
+
     
 class RemoteQueueRunner(QueueRunner):
     def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):
@@ -199,14 +212,18 @@ class RemoteQueueRunner(QueueRunner):
         item_pickle = pickle.dumps(qitem.img)
         p1 = time.time()
         request = basic_pb2.RequestItem(items=item_pickle)
-        response: basic_pb2.ItemResult = self.stub.InferenceItem(request)
-        p2 = time.time()
-        result, time_taken = pickle.loads(response.results)
-        e = time.time()
-        self.time_taken.append(time_taken)
-        self.coms.append(p2 - p1 - time_taken)
-        self.pickling.append((p1 - s, e - p2))
-        return result
+        try:
+            response: basic_pb2.ItemResult = self.stub.InferenceItem(request, timeout=self.timeout)
+            p2 = time.time()
+            result, time_taken = pickle.loads(response.results)
+            e = time.time()
+            self.time_taken.append(time_taken)
+            self.coms.append(p2 - p1 - time_taken)
+            self.pickling.append((p1 - s, e - p2))
+            return result
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return [None]*len(qitem.img)
 
 class TCPRemoteRunnerBase(RunnerBase):
     def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):

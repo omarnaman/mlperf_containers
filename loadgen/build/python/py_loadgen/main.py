@@ -277,6 +277,7 @@ def add_results(final_results, name, result_dict, result_list, took, show_accura
         "count": len(result_list),
         "good_items": result_dict["good"],
         "total_items": result_dict["total"],
+        "bad": result_dict["bad"]
     }
     acc_str = ""
     if show_accuracy:
@@ -418,7 +419,7 @@ def main():
     qsl = lg.ConstructQSL(count, min(count, 500), ds.load_query_samples, ds.unload_query_samples)
 
     log.info("starting {}".format(scenario))
-    result_dict = {"good": 0, "total": 0, "scenario": str(scenario)}
+    result_dict = {"good": 0, "total": 0, "scenario": str(scenario), "bad": 0}
     runner.start_run(result_dict, args.accuracy)
 
     lg.StartTestWithLogSettings(sut, qsl, settings, log_settings)
@@ -427,6 +428,8 @@ def main():
         last_timeing = runner.result_timing
     if args.accuracy:
         post_proc.finalize(result_dict, ds, output_dir=args.output)
+    else:
+        post_proc.record_totals(result_dict)
 
     add_results(final_results, "{}".format(scenario),
                 result_dict, last_timeing, time.time() - ds.last_loaded, args.accuracy)
