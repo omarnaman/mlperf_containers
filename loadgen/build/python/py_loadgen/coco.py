@@ -134,6 +134,7 @@ class PostProcessCoco:
         self.results = []
         self.good = 0
         self.total = 0
+        self.bad_query = 0
         self.content_ids = []
         self.use_inv_map = False
 
@@ -145,6 +146,10 @@ class PostProcessCoco:
         #   tensorflow, ssd-mobilenet: num_detections,detection_boxes,detection_scores,detection_classes
         processed_results = []
         # batch size
+        if results[0] is None:
+            self.bad_query += 1
+            # TODO: replace -1 with a meaningful enum
+            return [[-1]]*len(ids)
         bs = len(results[0])
 
         for idx in range(0, bs):
@@ -161,9 +166,9 @@ class PostProcessCoco:
                     self.good += 1
                 box = detection_boxes[detection]
                 processed_results[idx].append([float(ids[idx]),
-                                              box[0], box[1], box[2], box[3],
-                                              results[2][idx][detection],
-                                              float(detection_class)])
+                                            box[0], box[1], box[2], box[3],
+                                            results[2][idx][detection],
+                                            float(detection_class)])
                 self.total += 1
         return processed_results
 
@@ -171,10 +176,17 @@ class PostProcessCoco:
         self.results = []
         self.good = 0
         self.total = 0
+        self.bad_query = 0
+
+    def record_totals(self, result_dict):
+        result_dict["good"] += self.good
+        result_dict["total"] += self.total
+        result_dict["bad"] += self.bad_query
 
     def finalize(self, result_dict, ds=None, output_dir=None):
         result_dict["good"] += self.good
         result_dict["total"] += self.total
+        result_dict["bad"] += self.bad_query
 
         if self.use_inv_map:
             # for pytorch
