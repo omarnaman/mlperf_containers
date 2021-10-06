@@ -5,7 +5,6 @@ FROM ubuntu:20.04
 
 EXPOSE 8086
 
-WORKDIR /workspace/python/
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -14,15 +13,14 @@ RUN apt-get update && \
             python3-opencv  && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /requirements.txt
-RUN pip3 install --no-cache-dir -r /requirements.txt
-
-COPY python /workspace/python/
-
-# defult parameter to ENTRYPOINT 
-# CMD  ["10"]
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
             iproute2 
+
+COPY requirements.txt /requirements.txt
+RUN pip3 install --no-cache-dir -r /requirements.txt
+
+WORKDIR /workspace/python/
+COPY python /workspace/python/
 
 ENTRYPOINT ["python3", "/workspace/python/main.py", "serve", "--model", "ssd-mobilenet"]
