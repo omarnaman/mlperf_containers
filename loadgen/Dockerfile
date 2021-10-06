@@ -34,6 +34,16 @@ RUN git clone https://github.com/pybind/pybind11.git && \
     cp -r pybind11/include/pybind11 /usr/include && \
     rm -rf pybind11
 
+# install ccli_colors
+RUN git clone https://github.com/omarnaman/ccli_colors && \
+    cp -r ccli_colors/cli_colors.h /usr/include && \
+    rm -rf ccli_colors
+
+# install cli_colors
+RUN git clone https://github.com/omarnaman/cli_colors && \
+    pip3 install ./cli_colors && \
+    rm -rf cli_colors
+    
 COPY build /workspace/loadgen/build/
 
 
