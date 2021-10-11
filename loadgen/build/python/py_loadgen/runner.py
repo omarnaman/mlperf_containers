@@ -168,8 +168,9 @@ class QueueRunner(RunnerBase):
 # TODO: Re-structure inheritance to write the remote functionality once
 
 class RemoteRunnerBase(RunnerBase):
-    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None):
         super().__init__(None, ds, threads, post_proc=post_proc, max_batchsize=max_batchsize)
+        self.timeout = timeout
         self.connect(SUT_address)
     
     def connect(self, SUT_address):
@@ -198,8 +199,9 @@ class RemoteRunnerBase(RunnerBase):
 
     
 class RemoteQueueRunner(QueueRunner):
-    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None):
         super().__init__(None, ds, threads, post_proc=post_proc, max_batchsize=max_batchsize)
+        self.timeout = timeout
         self.connect(SUT_address)
     
     def connect(self, SUT_address):

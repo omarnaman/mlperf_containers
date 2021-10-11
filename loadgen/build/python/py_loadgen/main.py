@@ -207,6 +207,8 @@ def get_args():
     parser.add_argument("--address", type=str, default="localhost:8086", help="the address of the remote model. used with --remote")
 
     parser.add_argument("--tcp", action="store_true", help="use plain TCP communication instead of gRPC")
+    parser.add_argument("--timeout", type=float, help="set the deadline for an inference reqeust", default=None)
+
 
     args = parser.parse_args()
 
@@ -365,7 +367,7 @@ def main():
         lg.TestScenario.Server: QueueRunner,
         lg.TestScenario.Offline: QueueRunner
     }
-    runner = runner_map[scenario](ds, args.threads, post_proc=post_proc, max_batchsize=args.max_batchsize, SUT_address=args.address)
+    runner = runner_map[scenario](ds, args.threads, post_proc=post_proc, max_batchsize=args.max_batchsize, SUT_address=args.address, timeout=args.timeout)
 
     def issue_queries(query_samples):
         runner.enqueue(query_samples)
