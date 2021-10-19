@@ -1,10 +1,10 @@
 DELAY=""
 BANDWIDTH=""
+TC=0
 function getTCArgs () {
     NONTC=()
     while [[ $# -gt 0 ]]; do
         key="$1"
-        TC=0
         case $key in
             --tc)
             TC=1
