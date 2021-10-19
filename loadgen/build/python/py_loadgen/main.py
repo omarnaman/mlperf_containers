@@ -207,7 +207,8 @@ def get_args():
     parser.add_argument("--address", type=str, default="localhost:8086", help="the address of the remote model. used with --remote")
 
     parser.add_argument("--tcp", action="store_true", help="use plain TCP communication instead of gRPC")
-    parser.add_argument("--timeout", type=float, help="set the deadline for an inference reqeust", default=None)
+    parser.add_argument("--timeout", type=float, help="set the deadline for an inference request", default=None)
+    # parser.add_argument("--max_outgoing", type=float, help="set the maximum number of pending requests per thread", default=1)
 
 
     args = parser.parse_args()
@@ -258,8 +259,8 @@ def get_runners(is_tcp):
         from runner import TCPRemoteRunnerBase, TCPRemoteQueueRunner
         return TCPRemoteRunnerBase, TCPRemoteQueueRunner
     else:
-        from runner import RemoteRunnerBase, RemoteQueueRunner
-        return RemoteRunnerBase, RemoteQueueRunner
+        from runner import RemoteRunnerBase, AsyncRemoteQueueRunner
+        return RemoteRunnerBase, AsyncRemoteQueueRunner
 
 
 def add_results(final_results, name, result_dict, result_list, took, show_accuracy=False):
@@ -273,6 +274,7 @@ def add_results(final_results, name, result_dict, result_list, took, show_accura
     # this is what we record for each run
     result = {
         "took": took,
+        "latency_sum": sum(result_list),
         "mean": np.mean(result_list),
         "percentiles": {str(k): v for k, v in zip(percentiles, buckets)},
         "qps": len(result_list) / took,

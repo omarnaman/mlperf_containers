@@ -11,6 +11,7 @@ import grpc
 
 import socket
 import pickle
+import asyncio
 # TODO: remove dependency
 import cli_colors
 
@@ -226,6 +227,129 @@ class RemoteQueueRunner(QueueRunner):
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
                 return [None]*len(qitem.img)
+
+class AsyncRemoteQueueRunner(QueueRunner):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None, max_outgoing=2):
+        super().__init__(None, ds, threads=0, post_proc=post_proc, max_batchsize=max_batchsize)
+        self.threads = threads
+        self.timeout = timeout
+        self.max_outgoing = max_outgoing
+        self.connect(SUT_address)
+    
+        for _ in range(self.threads):
+            worker = threading.Thread(target=self.intermediate_handler, args=(self.tasks,))
+            worker.daemon = True
+            self.workers.append(worker)
+            worker.start()
+
+    def connect(self, SUT_address):
+        self.SUT_address = SUT_address
+        self.channel = grpc.insecure_channel(SUT_address)
+        self.stub = basic_pb2_grpc.BasicServiceStub(self.channel)
+
+    def predict(self, qitem: Item):
+        s = time.time()
+        item_pickle = pickle.dumps(qitem.img)
+        p1 = time.time()
+        request = basic_pb2.RequestItem(items=item_pickle)
+        try:
+            response: basic_pb2.ItemResult = self.stub.InferenceItem(request, timeout=self.timeout)
+            p2 = time.time()
+            result, time_taken = pickle.loads(response.results)
+            e = time.time()
+            self.time_taken.append(time_taken)
+            self.coms.append(p2 - p1 - time_taken)
+            self.pickling.append((p1 - s, e - p2))
+            return result
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                return [None]*len(qitem.img)
+
+    async def handle_tasks(self, tasks_queue:Queue, max_outgoing=2):
+        """Worker thread."""
+        future_list = []
+        broken = False
+        while not broken or len(future_list) > 1:
+            while len(future_list) < max_outgoing and not broken:
+                try:
+                    timeout = 1 if len(future_list) > 0 else None
+                    qitem: Item = tasks_queue.get(timeout=timeout)
+                    if qitem is None:
+                        broken = True
+                        # None in the queue indicates the parent want us to exit
+                        tasks_queue.task_done()
+                        break
+                    else:
+                        future = asyncio.Future()
+                        asyncio.ensure_future(self.run_one_item(qitem, future))
+                        future_list.append(future)
+                except:
+                    break
+            if len(future_list) > 0:
+                done, pending = await asyncio.wait(future_list, return_when=asyncio.FIRST_COMPLETED)
+                future_list = list(pending)
+                for _ in range(len(done)):
+                    tasks_queue.task_done()
+
+    def intermediate_handler(self, tasks_queue):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.handle_tasks(tasks_queue, self.max_outgoing))
+        loop.close()
+
+    def enqueue(self, query_samples):
+        idx = [q.index for q in query_samples]
+        query_id = [q.id for q in query_samples]
+        self.samples += len(query_samples)
+        self.batches += math.ceil(len(query_samples)/self.max_batchsize)
+        if len(query_samples) < self.max_batchsize:
+            data, label = self.ds.get_samples(idx)
+            self.tasks.put(Item(query_id, idx, data, label))
+        else:
+            bs = self.max_batchsize
+            for i in range(0, len(idx), bs):
+                ie = i + bs
+                data, label = self.ds.get_samples(idx[i:ie])
+                self.tasks.put(Item(query_id[i:ie], idx[i:ie], data, label))
+
+    async def run_one_item(self, qitem, future: asyncio.Future):
+        # run the prediction
+        processed_results = []
+        try:
+
+            results = self.predict(qitem)            
+            processed_results = self.post_process(results, qitem.content_id, qitem.label, self.result_dict)
+            
+            if self.take_accuracy:
+                self.post_process.add_results(processed_results)
+                self.result_timing.append(time.time() - qitem.start)
+        except Exception as ex:  # pylint: disable=broad-except
+            src = [self.ds.get_item_loc(i) for i in qitem.content_id]
+            log.error("thread: failed on contentid=%s, %s", src, ex)
+            # since post_process will not run, fake empty responses
+            processed_results = [[]] * len(qitem.query_id)
+        finally:
+            response_array_refs = []
+            response = []
+            for idx, query_id in enumerate(qitem.query_id):
+                response_array = array.array("B", np.array(processed_results[idx], np.float32).tobytes())
+                response_array_refs.append(response_array)
+                bi = response_array.buffer_info()
+                # request timeout
+                if len(processed_results[idx]) > 0 and processed_results[idx][0] == -1:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], lg.InvalidSize()))
+                else:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], bi[1]))
+            lg.QuerySamplesComplete(response)
+            future.set_result(1)
+
+    def finish(self):
+        # exit all threads
+        for _ in self.workers:
+            self.tasks.put(None)
+        for worker in self.workers:
+            worker.join()
+        super().finish()
 
 class TCPRemoteRunnerBase(RunnerBase):
     def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):
