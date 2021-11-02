@@ -442,15 +442,11 @@ class StreamerQueueRunner(QueueRunner):
                     id = random.randint(1, 99999999)
                     pending_queue.put((qitem, id))
                     cache[id] = None if qitem is None else (qitem.query_id, qitem.content_id, qitem.label, qitem.start)
-                    if len(cache) > 1:
-                        cli_colors.color_print(f"Cache length: {len(cache)}", cli_colors.PINK)
                     if qitem is None:
                         broken = True
-                        cli_colors.color_print("Pushing None", cli_colors.PINK)
                         pending_queue.put((None, None))
                         break
                 except Exception as e:
-                    cli_colors.color_print("THREAD BREAKING", cli_colors.YELLOW)
                     cli_colors.color_print(e, cli_colors.YELLOW)
                     break
         consumer.join()
