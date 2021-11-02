@@ -61,13 +61,14 @@ def get_backend(backend):
 
 class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
     model = None
-    def __init__(self, backend, model_path, inputs, outputs, threads=0) -> None:
+    def __init__(self, backend, model_path, inputs, outputs, threads=0, consumers_per_client=3) -> None:
         self.model = backend.load(model_path, inputs=inputs, outputs=outputs, threads=threads)
         self.model_path = model_path
         self.backend = backend
         self.outputs = outputs
         self.inputs = inputs
         self.threads = threads
+        self.consumers_per_client = consumers_per_client
         super().__init__()
 
     def InferenceItem(self, request: basic_pb2.RequestItem, context: grpc.ServicerContext):
@@ -98,8 +99,7 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
     def _handleRequestIterator(self, request_iterator: Iterator[basic_pb2.RequestItem]):
         result_queue = Queue()
         request_queue = Queue()
-        consumer_threads = 5
-        consumers = [threading.Thread(target=self._pullFromQueue, args=(request_queue, result_queue)) for _ in range(consumer_threads)]
+        consumers = [threading.Thread(target=self._pullFromQueue, args=(request_queue, result_queue)) for _ in range(self.consumers_per_client)]
         builder = threading.Thread(target=self._putToQueue, args=(request_iterator, request_queue))
         builder.start()
         for consumer in consumers:
@@ -107,11 +107,11 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
             consumer.start()
         while True:
             if not builder.is_alive():
-                for _ in range(consumer_threads):   
+                for _ in range(self.consumers_per_client):   
                     request_queue.put(None)
-            if True in [c.is_alive() for c in consumers]:
+            if True in [c.is_alive() for c in consumers] or not result_queue.empty():
                 try:
-                    yield result_queue.get(timeout=1)
+                    yield result_queue.get(block=False)
                 except:
                     pass
             else:
@@ -142,6 +142,8 @@ def get_args(extra_args: List[str]):
     parser.add_argument("--model-path", type=str, help="the path to the model", required=False)
     parser.add_argument("--model", type=str, help="the name of the model to serve", required=False)
     parser.add_argument("--runtime", type=str, help="the runtime name", default="onnxruntime")
+    parser.add_argument("--consumer-threads", type=int, default=2,
+                        help="the number of consumer threads each client gets")
     args = parser.parse_args(extra_args)
     print(args)
     if args.model_path is None and args.model is None:
@@ -166,7 +168,7 @@ def serve(extra_args: List[str]):
     print("Listening on [0.0.0.0:8086]...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=32))
     basic_pb2_grpc.add_BasicServiceServicer_to_server(
-        BasicServiceServicer(backend, model_path, None, ['num_detections:0','detection_boxes:0','detection_scores:0','detection_classes:0'], threads=args.model_threads), server)
+        BasicServiceServicer(backend, model_path, None, ['num_detections:0','detection_boxes:0','detection_scores:0','detection_classes:0'], threads=args.model_threads, consumers_per_client=args.consumer_threads), server)
     server.add_insecure_port('0.0.0.0:8086')
     server.start()
     server.wait_for_termination()
