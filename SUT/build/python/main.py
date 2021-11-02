@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import List
+import threading
+from typing import Iterator, List
 import basic_pb2
 import basic_pb2_grpc
 import grpc
@@ -9,8 +10,7 @@ import pickle
 # TODO: replace with typer
 import argparse
 
-import json
-import time
+from queue import Queue
 from enum import Enum
 from concurrent import futures
 import os
@@ -72,13 +72,58 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
 
     def InferenceItem(self, request: basic_pb2.RequestItem, context: grpc.ServicerContext):
         items = pickle.loads(request.items)
-        s = time.time()
         results = self.model.predict({self.model.inputs[0]: items})
-        e = time.time()
-        results = pickle.dumps((results, e-s), protocol=0)
+        results = pickle.dumps((results, 0), protocol=0)
         response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results)
         return response
     
+    def _inferenceItem(self, request: basic_pb2.RequestItem):
+        items = pickle.loads(request.items)
+        results = self.model.predict({self.model.inputs[0]: items})
+        results = pickle.dumps((results, 0), protocol=0)
+        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
+        return response
+
+    def _pullFromQueue(self, request_queue: Queue, result_queue: Queue):
+        while True:
+            request = request_queue.get()
+            if request is None:
+                return
+            result_queue.put(self._inferenceItem(request))
+
+    def _putToQueue(self, request_iterator: Iterator[basic_pb2.RequestItem], request_queue: Queue):
+        for request in request_iterator:
+            request_queue.put(request)
+    
+    def _handleRequestIterator(self, request_iterator: Iterator[basic_pb2.RequestItem]):
+        result_queue = Queue()
+        request_queue = Queue()
+        consumer_threads = 5
+        consumers = [threading.Thread(target=self._pullFromQueue, args=(request_queue, result_queue)) for _ in range(consumer_threads)]
+        builder = threading.Thread(target=self._putToQueue, args=(request_iterator, request_queue))
+        builder.start()
+        for consumer in consumers:
+            consumer.daemon = True
+            consumer.start()
+        while True:
+            if not builder.is_alive():
+                for _ in range(consumer_threads):   
+                    request_queue.put(None)
+            if True in [c.is_alive() for c in consumers]:
+                try:
+                    yield result_queue.get(timeout=1)
+                except:
+                    pass
+            else:
+                return
+
+
+    def StreamInferenceItem(self, request_iterator, context):
+        result_gen = self._handleRequestIterator(request_iterator)
+        while True:
+            yield next(result_gen)
+
+
     def ChangeThreads(self, request, context):
         n = request.threads
         if n == self.threads:

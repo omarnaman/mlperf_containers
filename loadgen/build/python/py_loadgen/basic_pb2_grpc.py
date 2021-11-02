@@ -19,6 +19,11 @@ class BasicServiceStub(object):
                 request_serializer=basic__pb2.RequestItem.SerializeToString,
                 response_deserializer=basic__pb2.ItemResult.FromString,
                 )
+        self.StreamInferenceItem = channel.stream_stream(
+                '/BasicService/StreamInferenceItem',
+                request_serializer=basic__pb2.RequestItem.SerializeToString,
+                response_deserializer=basic__pb2.ItemResult.FromString,
+                )
         self.ChangeThreads = channel.unary_unary(
                 '/BasicService/ChangeThreads',
                 request_serializer=basic__pb2.ThreadRequest.SerializeToString,
@@ -35,6 +40,12 @@ class BasicServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def StreamInferenceItem(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ChangeThreads(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -46,6 +57,11 @@ def add_BasicServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'InferenceItem': grpc.unary_unary_rpc_method_handler(
                     servicer.InferenceItem,
+                    request_deserializer=basic__pb2.RequestItem.FromString,
+                    response_serializer=basic__pb2.ItemResult.SerializeToString,
+            ),
+            'StreamInferenceItem': grpc.stream_stream_rpc_method_handler(
+                    servicer.StreamInferenceItem,
                     request_deserializer=basic__pb2.RequestItem.FromString,
                     response_serializer=basic__pb2.ItemResult.SerializeToString,
             ),
@@ -76,6 +92,23 @@ class BasicService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/BasicService/InferenceItem',
+            basic__pb2.RequestItem.SerializeToString,
+            basic__pb2.ItemResult.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def StreamInferenceItem(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(request_iterator, target, '/BasicService/StreamInferenceItem',
             basic__pb2.RequestItem.SerializeToString,
             basic__pb2.ItemResult.FromString,
             options, channel_credentials,

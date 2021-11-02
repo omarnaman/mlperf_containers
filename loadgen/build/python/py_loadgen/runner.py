@@ -126,6 +126,7 @@ class QueueRunner(RunnerBase):
         self.workers = []
         self.result_dict = {}
 
+    def _start_threads(self):
         for _ in range(self.threads):
             worker = threading.Thread(target=self.handle_tasks, args=(self.tasks,))
             worker.daemon = True
@@ -350,6 +351,108 @@ class AsyncRemoteQueueRunner(QueueRunner):
         for worker in self.workers:
             worker.join()
         super().finish()
+
+class StreamerQueueRunner(QueueRunner):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, 
+    SUT_address="localhost:8086", timeout=None, max_outgoing=2,**_):
+        super().__init__(None, ds, threads, post_proc=post_proc, max_batchsize=max_batchsize, **_)
+        self.timeout = timeout
+        self.max_outgoing = max_outgoing
+        self.SUT_address = SUT_address
+        self.connect()
+
+        def _start_threads(self):
+            for _ in range(self.threads):
+                worker = threading.Thread(target=self.handle_tasks, args=(self.tasks, self.max_outgoing))
+                worker.daemon = True
+                self.workers.append(worker)
+                worker.start()
+
+    def connect(self):
+        self.channel = grpc.insecure_channel(self.SUT_address)
+    
+    def get_new_stub(self):
+        stub = basic_pb2_grpc.BasicServiceStub(self.channel)
+        return stub
+    
+    def get_request_generator(self, pending_queue: Queue):
+        while True:
+            qitem, id = pending_queue.get()
+            if qitem is None:
+                # None in the queue indicates the parent want us to exit
+                pending_queue.task_done()
+                break
+            item_pickle = pickle.dumps(qitem.img)
+            yield basic_pb2.RequestItem(items=item_pickle, id=id)
+
+
+    def process_response(self, response, qitem_cache):
+        qitem = Item(query_id=qitem_cache[0], content_id=qitem_cache[1], img=None, label=qitem_cache[2])
+        qitem.start = qitem_cache[3]
+        response, _ = pickle.loads(response.results)
+        try:
+            processed_results = self.post_process(response, qitem.content_id, qitem.label, self.result_dict)
+            if self.take_accuracy:
+                    self.post_process.add_results(processed_results)
+                    self.result_timing.append(time.time() - qitem.start)
+        except Exception as ex:  # pylint: disable=broad-except
+            src = [self.ds.get_item_loc(i) for i in qitem.content_id]
+            log.error("thread: failed on contentid=%s, %s", src, ex)
+            # since post_process will not run, fake empty responses
+            processed_results = [[]] * len(qitem.query_id)
+        finally:
+            response_array_refs = []
+            response = []
+            for idx, query_id in enumerate(qitem.query_id):
+                response_array = array.array("B", np.array(processed_results[idx], np.float32).tobytes())
+                response_array_refs.append(response_array)
+                bi = response_array.buffer_info()
+                # request timeout
+                if len(processed_results[idx]) > 0 and processed_results[idx][0] == -1:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], lg.InvalidSize()))
+                else:
+                    response.append(lg.QuerySampleResponse(query_id, bi[0], bi[1]))
+            lg.QuerySamplesComplete(response)
+
+
+    def consume(self, stub, requests_iter, cache):
+            responses = stub.StreamInferenceItem(requests_iter)
+            try:
+                for response in responses:
+                        self.process_response(response, cache[response.id])
+                        del cache[response.id]
+            except Exception as e:
+                    cli_colors.color_print(e, cli_colors.RED)
+                
+    def handle_tasks(self, tasks_queue, max_outgoing=2):
+        """Worker thread."""
+        pending_queue = Queue()
+        requestGenerator = self.get_request_generator(pending_queue)
+        cache = {}
+        stub = self.get_new_stub()
+        consumer = threading.Thread(target=self.consume, args=(stub, requestGenerator, cache))
+        consumer.daemon = True
+        consumer.start()
+        broken = False
+        while not broken:
+            while len(cache) < max_outgoing and not broken:
+                try:
+                    qitem: Item = tasks_queue.get()
+                    id = random.randint(1, 99999999)
+                    pending_queue.put((qitem, id))
+                    cache[id] = None if qitem is None else (qitem.query_id, qitem.content_id, qitem.label, qitem.start)
+                    if len(cache) > 1:
+                        cli_colors.color_print(f"Cache length: {len(cache)}", cli_colors.PINK)
+                    if qitem is None:
+                        broken = True
+                        cli_colors.color_print("Pushing None", cli_colors.PINK)
+                        pending_queue.put((None, None))
+                        break
+                except Exception as e:
+                    cli_colors.color_print("THREAD BREAKING", cli_colors.YELLOW)
+                    cli_colors.color_print(e, cli_colors.YELLOW)
+                    break
+        consumer.join()
 
 class TCPRemoteRunnerBase(RunnerBase):
     def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086"):

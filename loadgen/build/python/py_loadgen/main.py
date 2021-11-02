@@ -159,7 +159,7 @@ SUPPORTED_PROFILES = {
         "backend": "onnxruntime",
         "data-format": "NHWC",
         "model-name": "ssd-resnet34",
-    },
+    }
 }
 
 SCENARIO_MAP = {
@@ -208,7 +208,8 @@ def get_args():
 
     parser.add_argument("--tcp", action="store_true", help="use plain TCP communication instead of gRPC")
     parser.add_argument("--timeout", type=float, help="set the deadline for an inference request", default=None)
-    # parser.add_argument("--max_outgoing", type=float, help="set the maximum number of pending requests per thread", default=1)
+    parser.add_argument("--pl", action="store_true", help="use async calls to server allowing multiple outgoing calls")
+    parser.add_argument("--max_outgoing", type=int, help="set the maximum number of pending requests per thread", default=1)
 
 
     args = parser.parse_args()
@@ -254,14 +255,16 @@ def get_backend(backend):
         raise ValueError("unknown backend: " + backend)
     return backend
 
-def get_runners(is_tcp):
+def get_runners(is_tcp: bool, pl: bool):
     if is_tcp:
         from runner import TCPRemoteRunnerBase, TCPRemoteQueueRunner
         return TCPRemoteRunnerBase, TCPRemoteQueueRunner
+    elif pl:
+        from runner import RemoteRunnerBase, StreamerQueueRunner
+        return RemoteRunnerBase, StreamerQueueRunner
     else:
-        from runner import RemoteRunnerBase, AsyncRemoteQueueRunner
-        return RemoteRunnerBase, AsyncRemoteQueueRunner
-
+        from runner import RemoteRunnerBase, RemoteQueueRunner
+        return RemoteRunnerBase, RemoteQueueRunner
 
 def add_results(final_results, name, result_dict, result_list, took, show_accuracy=False):
     percentiles = [50., 80., 90., 95., 99., 99.9]
@@ -362,14 +365,14 @@ def main():
     # ds.unload_query_samples(None)
 
     scenario = SCENARIO_MAP[args.scenario]
-    RunnerBase, QueueRunner = get_runners(args.tcp)
+    RunnerBase, QueueRunner = get_runners(args.tcp, args.pl)
     runner_map = {
         lg.TestScenario.SingleStream:  RunnerBase,
         lg.TestScenario.MultiStream: QueueRunner,
         lg.TestScenario.Server: QueueRunner,
         lg.TestScenario.Offline: QueueRunner
     }
-    runner = runner_map[scenario](ds, args.threads, post_proc=post_proc, max_batchsize=args.max_batchsize, SUT_address=args.address, timeout=args.timeout)
+    runner = runner_map[scenario](ds, args.threads, post_proc=post_proc, max_batchsize=args.max_batchsize, SUT_address=args.address, timeout=args.timeout, max_outgoing=args.max_outgoing)
 
     def issue_queries(query_samples):
         runner.enqueue(query_samples)

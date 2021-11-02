@@ -1,15 +1,18 @@
 syntax = "proto3";
 service BasicService {
     rpc InferenceItem (RequestItem) returns (ItemResult);
+    rpc StreamInferenceItem (stream RequestItem) returns (stream ItemResult);
     rpc ChangeThreads (ThreadRequest) returns (ThreadReply);
 }
 
 message RequestItem {
     bytes items = 1;
+    int32 id = 2;
 }
 
 message ItemResult {
     bytes results = 1;
+    int32 id = 2;
 }
 
 message ThreadRequest {
