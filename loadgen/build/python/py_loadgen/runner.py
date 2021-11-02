@@ -38,7 +38,7 @@ class RunnerBase:
     batches = 0
     samples = 0
 
-    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128, timeout=1):
+    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128, timeout=1, **_):
         self.take_accuracy = False
         self.ds = ds
         self.model = model
@@ -120,7 +120,7 @@ class RunnerBase:
 
 class QueueRunner(RunnerBase):
 
-    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128):
+    def __init__(self, model, ds, threads, post_proc=None, max_batchsize=128, **_):
         super().__init__(model, ds, threads, post_proc, max_batchsize)
         self.tasks = Queue(maxsize=threads * 4)
         self.workers = []
@@ -169,7 +169,7 @@ class QueueRunner(RunnerBase):
 # TODO: Re-structure inheritance to write the remote functionality once
 
 class RemoteRunnerBase(RunnerBase):
-    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None, **_):
         super().__init__(None, ds, threads, post_proc=post_proc, max_batchsize=max_batchsize)
         self.timeout = timeout
         self.connect(SUT_address)
@@ -200,7 +200,7 @@ class RemoteRunnerBase(RunnerBase):
 
     
 class RemoteQueueRunner(QueueRunner):
-    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None, **_):
         super().__init__(None, ds, threads, post_proc=post_proc, max_batchsize=max_batchsize)
         self.timeout = timeout
         self.connect(SUT_address)
@@ -229,7 +229,7 @@ class RemoteQueueRunner(QueueRunner):
                 return [None]*len(qitem.img)
 
 class AsyncRemoteQueueRunner(QueueRunner):
-    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None, max_outgoing=2):
+    def __init__(self, ds, threads, post_proc=None, max_batchsize=128, SUT_address="localhost:8086", timeout=None, max_outgoing=2, **_):
         super().__init__(None, ds, threads=0, post_proc=post_proc, max_batchsize=max_batchsize)
         self.threads = threads
         self.timeout = timeout
