@@ -125,7 +125,8 @@ class QueueRunner(RunnerBase):
         self.tasks = Queue(maxsize=threads * 4)
         self.workers = []
         self.result_dict = {}
-
+        self._start_threads()
+        
     def _start_threads(self):
         for _ in range(self.threads):
             worker = threading.Thread(target=self.handle_tasks, args=(self.tasks,))
