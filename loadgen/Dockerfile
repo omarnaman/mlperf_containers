@@ -1,8 +1,6 @@
 FROM ubuntu:20.04
 
-# Remove all stopped containers: docker rm $(docker ps -a -q)
-# Remove containers like none:none: docker rmi $(docker images | grep none | awk '{print $3}')
-
+# To be built from parent directory
 
 WORKDIR /workspace/loadgen/
 
@@ -24,9 +22,7 @@ RUN apt-get update && \
             
 RUN rm -rf /var/lib/apt/lists/*
 
-
-COPY build /workspace/loadgen/build/
-COPY requirements.txt /requirements.txt
+COPY loadgen/requirements.txt /requirements.txt
 
 # install pip packages
 RUN pip3 install --no-cache-dir -r /requirements.txt
@@ -36,20 +32,39 @@ RUN git clone https://github.com/pybind/pybind11.git && \
     cp -r pybind11/include/pybind11 /usr/include && \
     rm -rf pybind11
 
+# install ccli_colors
+RUN git clone https://github.com/omarnaman/ccli_colors && \
+    cp -r ccli_colors/cli_colors.h /usr/include && \
+    rm -rf ccli_colors
+
+# install cli_colors
+RUN git clone https://github.com/omarnaman/cli_colors && \
+    pip3 install ./cli_colors && \
+    rm -rf cli_colors
+    
+COPY loadgen/build /workspace/loadgen/build/
+COPY common/setup_tc.sh /workspace/loadgen/build/
+COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
+
+
+
+# generate dataset
+RUN cd /workspace/loadgen/build/python/tools && \
+    if [ -d ../coco ]; then echo "COCO FOUND"; else \
+        [ -f val2017.zip ] || wget -q http://images.cocodataset.org/zips/val2017.zip && \
+        [ -f annotations_trainval2017.zip ] || wget -q http://images.cocodataset.org/annotations/annotations_trainval2017.zip && \
+        [ -d val2017 ] || unzip val2017.zip && \
+        [ -d annotations ] || unzip annotations_trainval2017.zip && \
+        [ -d ../coco_300 ] || python3 ./upscale_coco.py --inputs . --outputs ../coco_300 --size 300 300 --format png && \
+    rm val2017.zip annotations_trainval2017.zip && \
+    rm -rf val2017 annotations; \
+    fi
+
+
 # install loadgen
 RUN cd /workspace/loadgen/build/c_loadgen && \
     FLAGS="-std=c++14" python3 setup.py install
     # rm -rf c_loadgen
-
-# generate dataset
-RUN cd /workspace/loadgen/build/python/tools && \
-    [ -f val2017.zip ] || wget -q http://images.cocodataset.org/zips/val2017.zip && \
-    [ -f annotations_trainval2017.zip ] || wget -q http://images.cocodataset.org/annotations/annotations_trainval2017.zip && \
-    unzip val2017.zip && \
-    unzip annotations_trainval2017.zip && \
-    python3 ./upscale_coco.py --inputs . --outputs ../coco_300 --size 300 300 --format png && \
-    rm val2017.zip annotations_trainval2017.zip && \
-    rm -rf val2017 annotations
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build

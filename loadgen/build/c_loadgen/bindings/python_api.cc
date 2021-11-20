@@ -17,6 +17,7 @@ limitations under the License.
 #define PYTHON_BINDINGS_H
 
 #include <functional>
+#include <stdlib.h>
 
 #include "../loadgen.h"
 #include "../query_sample.h"
@@ -335,6 +336,7 @@ PYBIND11_MODULE(mlperf_loadgen, m) {
   pybind11::bind_vector<std::vector<QuerySampleResponse>>(
       m, "VectorQuerySampleResponse");
 
+  m.def("InvalidSize", &std::numeric_limits<size_t>::max);
   m.def("ConstructSUT", &py::ConstructSUT, "Construct the system under test.");
   m.def("DestroySUT", &py::DestroySUT,
         "Destroy the object created by ConstructSUT.");

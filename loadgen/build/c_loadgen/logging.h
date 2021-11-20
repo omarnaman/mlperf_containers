@@ -314,7 +314,8 @@ class AsyncLog {
                                size_t latencies_to_reserve);
   void RecordSampleCompletion(uint64_t sample_sequence_id,
                               PerfClock::time_point completion_time,
-                              QuerySampleLatency latency);
+                              QuerySampleLatency latency,
+                              bool missed_deadline);
   std::vector<QuerySampleLatency> GetLatenciesBlocking(size_t expected_count);
   PerfClock::time_point GetMaxCompletionTime();
   QuerySampleLatency GetMaxLatencySoFar();
@@ -376,9 +377,10 @@ class AsyncLog {
   PerfClock::time_point max_completion_timstamp_;
   size_t latencies_recorded_ = 0;
   size_t latencies_expected_ = 0;
+  size_t deadlines_missed_ = 0;
   // Must be called with latencies_mutex_ held.
   bool AllLatenciesRecorded() {
-    return latencies_recorded_ == latencies_expected_;
+    return latencies_recorded_ == latencies_expected_ - deadlines_missed_;
   }
 };
 
