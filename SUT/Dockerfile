@@ -14,8 +14,8 @@ COPY SUT/requirements.txt /requirements.txt
 RUN pip3 install --no-cache-dir -r /requirements.txt
 
 COPY SUT/build /workspace/build/
-COPY common/setup_tc.sh /workspace/python/
-COPY common/grpc_proto/*.py /workspace/python/
+COPY common/setup_tc.sh /workspace/build/
+COPY common/grpc_proto/*.py /workspace/build/python/
 
 WORKDIR /workspace/build
 ENTRYPOINT ["bash", "./run_sut.sh", "serve", "--model", "ssd-mobilenet"]
