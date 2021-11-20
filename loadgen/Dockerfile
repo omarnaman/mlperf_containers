@@ -50,7 +50,7 @@ COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
 
 # generate dataset
 RUN cd /workspace/loadgen/build/python/tools && \
-    if [ -d ../coco ]; then echo "COCO FOUND" else \
+    if [ -d ../coco ]; then echo "COCO FOUND"; else \
         [ -f val2017.zip ] || wget -q http://images.cocodataset.org/zips/val2017.zip && \
         [ -f annotations_trainval2017.zip ] || wget -q http://images.cocodataset.org/annotations/annotations_trainval2017.zip && \
         [ -d val2017 ] || unzip val2017.zip && \
