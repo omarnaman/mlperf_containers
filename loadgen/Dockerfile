@@ -44,6 +44,8 @@ RUN git clone https://github.com/omarnaman/cli_colors && \
     
 COPY loadgen/build /workspace/loadgen/build/
 COPY common/setup_tc.sh /workspace/loadgen/build/
+COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
+
 
 
 # generate dataset
