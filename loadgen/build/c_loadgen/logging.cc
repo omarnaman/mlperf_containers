@@ -338,7 +338,8 @@ void AsyncLog::RestartLatencyRecording(uint64_t first_sample_sequence_id,
 
 void AsyncLog::RecordSampleCompletion(uint64_t sample_sequence_id,
                                       PerfClock::time_point completion_time,
-                                      QuerySampleLatency latency) {
+                                      QuerySampleLatency latency,
+                                      bool missed_deadline) {
   std::unique_lock<std::mutex> lock(latencies_mutex_);
   if (missed_deadline)
   {
