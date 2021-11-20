@@ -2,6 +2,7 @@
 *__pycache__
 */workspace/*/*_out
 *.zip
+*/build/**/basic_pb2*.py
 ssd-mobilenet
 loadgen/build/c_loadgen/build
 *libmlperf_loadgen.a
