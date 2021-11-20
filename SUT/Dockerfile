@@ -7,7 +7,8 @@ RUN apt-get update && \
             python3-dev \
             python3-pip \
             python3-opencv \
-            iproute2 && \
+            iproute2 \
+            net-tools && \
     rm -rf /var/lib/apt/lists/*
 
 COPY SUT/requirements.txt /requirements.txt
