@@ -1,45 +1,10 @@
-DELAY=""
-BANDWIDTH=""
-TC=0
-function getTCArgs () {
-    NONTC=()
-    while [[ $# -gt 0 ]]; do
-        key="$1"
-        case $key in
-            --tc)
-            TC=1
-            shift
-            ;;
-            -d|--tc_delay)
-            DELAY="$2"
-            shift 
-            shift 
-            ;;
-            -b|--tc_bandwidth)
-            BANDWIDTH="$2"
-            shift
-            shift
-            ;;
-            *)    # unknown option
-            NONTC+=("$1") # save it in an array for later
-            shift # past argument
-            ;;
-        esac
-    done
-}
-getTCArgs $@
-
-if [ $TC -eq 1 ]; then
-    source ./setup_tc.sh
-fi
-
+source ./setup_tc.sh $@
 
 set -- ${NONTC[@]}
 sut=$1;
 name=$2;
 output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet
-shift 1;
-shift 1;
+shift 2;
 python3 python/py_loadgen/main.py \
  --backend onnxruntime \
  --model-name ssd-mobilenet \

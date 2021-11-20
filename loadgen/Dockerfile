@@ -1,8 +1,6 @@
 FROM ubuntu:20.04
 
-# Remove all stopped containers: docker rm $(docker ps -a -q)
-# Remove containers like none:none: docker rmi $(docker images | grep none | awk '{print $3}')
-
+# To be built from parent directory
 
 WORKDIR /workspace/loadgen/
 
@@ -24,7 +22,7 @@ RUN apt-get update && \
             
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /requirements.txt
+COPY loadgen/requirements.txt /requirements.txt
 
 # install pip packages
 RUN pip3 install --no-cache-dir -r /requirements.txt
@@ -44,7 +42,8 @@ RUN git clone https://github.com/omarnaman/cli_colors && \
     pip3 install ./cli_colors && \
     rm -rf cli_colors
     
-COPY build /workspace/loadgen/build/
+COPY loadgen/build /workspace/loadgen/build/
+COPY common/setup_tc.sh /workspace/loadgen/build/
 
 
 # generate dataset
