@@ -18,10 +18,10 @@ RunnerBase::RunnerBase(Dataset* dataset) {
 }
 RunnerBase::~RunnerBase() { puts("RunnerRemote Constructor"); }
 
-void RunnerBase::run_query(const std::vector<mlperf::QuerySample>& samples) {
+void RunnerBase::runQuery(const std::vector<mlperf::QuerySample>& samples) {
   std::vector<mlperf::QuerySampleResponse> responses;
   for (auto i = samples.begin(); i != samples.end(); i++) {
-    Data* item = dataset->get_sample(i->index);
+    Data* item = dataset->getSample(i->index);
     mlperf::QuerySampleResponse r = predict(item);
     r.id = i->id;
     responses.push_back(r);
@@ -40,7 +40,7 @@ mlperf::QuerySampleResponse RunnerRemote::predict(const Data* item) {
       .id = 0, .data = (uintptr_t)item->data, .size = item->size};
 }
 
-std::string RunnerRemote::target_string() {
+std::string RunnerRemote::targetString() {
   std::stringstream ss;
   ss << remote_address << ":" << remote_port;
   return ss.str();
@@ -51,7 +51,7 @@ RunnerRemote::RunnerRemote(const std::string& address, const ushort& port,
     : RunnerBase(dataset), remote_address(address), remote_port(port) {
   puts("RunnerRemote Constructor");
   client = new BasicServiceClient(
-      grpc::CreateChannel(target_string(), grpc::InsecureChannelCredentials()));
+      grpc::CreateChannel(targetString(), grpc::InsecureChannelCredentials()));
 }
 
 RunnerRemote::~RunnerRemote() { puts("RunnerRemote Constructor"); }

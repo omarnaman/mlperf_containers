@@ -16,13 +16,13 @@
 using namespace mlperf;
 
 int main() {
-  TestSettings test_settings;
-  LogSettings log_settings;
-  test_settings.scenario = TestScenario::SingleStream;
-  test_settings.mode = TestMode::PerformanceOnly;
-  test_settings.single_stream_expected_latency_ns = 10000;
-  test_settings.min_query_count = 100;
-  test_settings.min_duration_ms = 10000;
+  TestSettings testSettings;
+  LogSettings logSettings;
+  testSettings.scenario = TestScenario::SingleStream;
+  testSettings.mode = TestMode::PerformanceOnly;
+  testSettings.single_stream_expected_latency_ns = 10000;
+  testSettings.min_query_count = 100;
+  testSettings.min_duration_ms = 10000;
 
   ushort port = 50051;
   std::string address = "localhost";
@@ -30,7 +30,7 @@ int main() {
   RunnerBase* runner = new RunnerRemote(address, port, dataset);
   SystemUnderTest* sut = new SUT(runner);
   QuerySampleLibrary* qsl = new QSL(1024, 128);
-  StartTest(sut, qsl, test_settings, log_settings);
+  StartTest(sut, qsl, testSettings, logSettings);
   // delete runner;
   delete sut;
   delete qsl;

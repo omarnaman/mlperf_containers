@@ -12,11 +12,11 @@ struct Data {
 };
 class Dataset {
  public:
-  std::vector<Data*>* datapoints;
+  std::vector<Data*>* dataPoints;
   Dataset();
   ~Dataset();
-  virtual void load_dataset() = 0;
-  virtual Data* get_sample(const int& index) = 0;
+  virtual void loadDataset() = 0;
+  virtual Data* getSample(const int& index) = 0;
 };
 
 class SyntheticDataset : public Dataset {
@@ -25,8 +25,8 @@ class SyntheticDataset : public Dataset {
   SyntheticDataset();
   ~SyntheticDataset();
 
-  void load_dataset() override;
-  Data* get_sample(const int& index) override;
+  void loadDataset() override;
+  Data* getSample(const int& index) override;
 };
 
 class StringDataset : public Dataset {
@@ -35,21 +35,21 @@ class StringDataset : public Dataset {
   StringDataset();
   ~StringDataset();
 
-  void load_dataset() override;
-  Data* get_sample(const int& index) override;
+  void loadDataset() override;
+  Data* getSample(const int& index) override;
 };
 
 class CocoDataset : public Dataset {
  private:
-  std::string labels_path = "coco/lables";
-  std::string image_dir = "coco/images/";
-  std::vector<std::string> list_dir(const std::string& dir_path);
+  std::string labelsPath = "coco/lables";
+  std::string imageDir = "coco/images/";
+  std::vector<std::string> listDir(const std::string& dir_path);
  public:
   CocoDataset(std::string& labels_path, std::string& image_dir);
   ~CocoDataset();
 
-  void load_dataset() override;
-  Data* get_sample(const int& index) override;
+  void loadDataset() override;
+  Data* getSample(const int& index) override;
 };
 
 #endif

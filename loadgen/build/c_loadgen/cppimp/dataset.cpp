@@ -9,19 +9,19 @@
 #include <string>
 #include <vector>
 
-Dataset::Dataset() { datapoints = new std::vector<Data*>(); }
+Dataset::Dataset() { dataPoints = new std::vector<Data*>(); }
 Dataset::~Dataset() {
-  for (auto&& point : *datapoints) {
+  for (auto&& point : *dataPoints) {
     delete point;
   }
-  delete datapoints;
+  delete dataPoints;
 };
 
 SyntheticDataset::SyntheticDataset(){};
 SyntheticDataset::~SyntheticDataset(){};
-void SyntheticDataset::load_dataset() { return; }
+void SyntheticDataset::loadDataset() { return; }
 
-Data* SyntheticDataset::get_sample(const int& index) {
+Data* SyntheticDataset::getSample(const int& index) {
   Data* res = new Data();
   res->data = (char*)new int(10);
   res->size = sizeof(int);
@@ -30,9 +30,9 @@ Data* SyntheticDataset::get_sample(const int& index) {
 }
 StringDataset::StringDataset(){};
 StringDataset::~StringDataset(){};
-void StringDataset::load_dataset() { return; }
+void StringDataset::loadDataset() { return; }
 
-Data* StringDataset::get_sample(const int& index) {
+Data* StringDataset::getSample(const int& index) {
   Data* res = new Data();
   res->data = new char[10];
   res->size = 10 * sizeof(char);
@@ -41,13 +41,13 @@ Data* StringDataset::get_sample(const int& index) {
   return res;
 }
 
-CocoDataset::CocoDataset(std::string& labels_path, std::string& image_dir){
-  this->image_dir = "coco/images/";//image_dir;
-  this->labels_path = "coco/lables";
+CocoDataset::CocoDataset(std::string& labelsPath, std::string& imageDir) {
+  this->imageDir = "coco/images/";  // imageDir;
+  this->labelsPath = "coco/lables";
 };
 CocoDataset::~CocoDataset(){};
-std::vector<std::string> CocoDataset::list_dir(const std::string& dir_path) {
-  DIR* dir_fd = opendir(dir_path.c_str());
+std::vector<std::string> CocoDataset::listDir(const std::string& dirPath) {
+  DIR* dir_fd = opendir(dirPath.c_str());
   std::vector<std::string> filelist;
   if (!dir_fd) {
     std::cerr << "Im dead lol\n";
@@ -63,16 +63,16 @@ std::vector<std::string> CocoDataset::list_dir(const std::string& dir_path) {
   return filelist;
 }
 
-void CocoDataset::load_dataset() {
+void CocoDataset::loadDataset() {
   std::ifstream labels_file, image_file;
   std::map<std::string, int> labels_map;
-  labels_file.open(labels_path);
+  labels_file.open(labelsPath);
   std::string image_name;
   int label;
   while (labels_file >> image_name >> label) {
     labels_map[image_name] = label;
   }
-  std::vector<std::string> image_list = list_dir(image_dir);
+  std::vector<std::string> image_list = listDir(imageDir);
   Data* item;
   for (auto&& image : image_list) {
     item = new Data();
@@ -87,13 +87,13 @@ void CocoDataset::load_dataset() {
       delete item;
     }
     item->label = iter->second;
-    datapoints->push_back(item);
+    dataPoints->push_back(item);
   }
 
   return;
 }
 
-Data* CocoDataset::get_sample(const int& index) {
-  assert(index < datapoints->size());
-  return datapoints->at(index);
+Data* CocoDataset::getSample(const int& index) {
+  assert(index < dataPoints->size());
+  return dataPoints->at(index);
 }

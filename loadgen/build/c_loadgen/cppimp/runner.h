@@ -18,7 +18,7 @@ class RunnerBase {
   RunnerBase(Dataset* dataset);
   ~RunnerBase();
   virtual mlperf::QuerySampleResponse predict(const Data* item) = 0;
-  virtual void run_query(const std::vector<mlperf::QuerySample>& indices);
+  virtual void runQuery(const std::vector<mlperf::QuerySample>& indices);
 };
 
 class RunnerRemote : public RunnerBase {
@@ -32,7 +32,7 @@ class RunnerRemote : public RunnerBase {
                Dataset* dataset);
   ~RunnerRemote();
   mlperf::QuerySampleResponse predict(const Data* item) override;
-  std::string target_string();
+  std::string targetString();
 };
 
 class SleepRunner : public RunnerBase {
