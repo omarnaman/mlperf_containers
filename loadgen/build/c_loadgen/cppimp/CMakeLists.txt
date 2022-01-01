@@ -38,6 +38,7 @@ set(HEADER_FILES
     ${mlperf_runner_hdr} ${mlperf_sut_src} ${mlperf_sut_hdr})
 
 # Generated sources
+# TODO: use lib from root directory instead of symlinks
 set(basic_proto_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.cc")
 set(basic_proto_hdrs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.h")
 set(basic_grpc_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.grpc.pb.cc")
