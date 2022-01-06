@@ -9,6 +9,7 @@ struct Data {
   char* data;
   size_t size;
   int label;
+  uintptr_t id;
 };
 class Dataset {
  public:

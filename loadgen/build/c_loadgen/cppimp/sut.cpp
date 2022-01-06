@@ -13,7 +13,7 @@ using namespace mlperf;
 // SUT implementation
 const std::string& SUT::Name() const { return name; }
 void SUT::IssueQuery(const std::vector<QuerySample>& samples) {
-  runner->run_query(samples);
+  runner->runQuery(samples);
   // // std::cout << "Sent a query\n";
   // std::vector<QuerySampleResponse> responses;
   // for (size_t i = 0; i < samples.size(); i++) {
