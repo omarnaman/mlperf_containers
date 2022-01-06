@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "basic.grpc.pb.h"
@@ -11,6 +12,7 @@
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerReaderWriter;
 using grpc::Status;
 
 // Logic and data behind the server's behavior.
@@ -23,6 +25,27 @@ class BasicServiceImpl final : public BasicService::Service {
     reply->set_id(request->id());
     return Status::OK;
   }
+
+  Status StreamInferenceItem(
+      ServerContext* context,
+      ServerReaderWriter<ItemResult, RequestItem>* stream) override {
+    RequestItem requestItem;
+    while (stream->Read(&requestItem)) {
+      ItemResult itemResult;
+      std::string s = requestItem.items();
+      std::cout << "Got item: " << *(int*)s.data()
+                << " with id: " << requestItem.id() << std::endl;
+      itemResult.set_results(s.data(), s.size());
+
+      itemResult.set_id(requestItem.id());
+      stream->Write(itemResult);
+    }
+
+    return Status::OK;
+  }
+
+ private:
+  std::mutex mt;
 };
 
 void RunServer() {
