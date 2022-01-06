@@ -19,7 +19,7 @@ PROTOBUF_PRAGMA_INIT_SEG
 constexpr RequestItem::RequestItem(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : items_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(0){}
+  , id_(uint64_t{0u}){}
 struct RequestItemDefaultTypeInternal {
   constexpr RequestItemDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -32,7 +32,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RequestItemDefaultTypeInternal 
 constexpr ItemResult::ItemResult(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : results_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(0){}
+  , id_(uint64_t{0u}){}
 struct ItemResultDefaultTypeInternal {
   constexpr ItemResultDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -118,8 +118,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_basic_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\013basic.proto\"(\n\013RequestItem\022\r\n\005items\030\001 "
-  "\001(\014\022\n\n\002id\030\002 \001(\005\")\n\nItemResult\022\017\n\007results"
-  "\030\001 \001(\014\022\n\n\002id\030\002 \001(\005\" \n\rThreadRequest\022\017\n\007t"
+  "\001(\014\022\n\n\002id\030\002 \001(\004\")\n\nItemResult\022\017\n\007results"
+  "\030\001 \001(\014\022\n\n\002id\030\002 \001(\004\" \n\rThreadRequest\022\017\n\007t"
   "hreads\030\001 \001(\005\"\031\n\013ThreadReply\022\n\n\002ok\030\001 \001(\0102"
   "\237\001\n\014BasicService\022*\n\rInferenceItem\022\014.Requ"
   "estItem\032\013.ItemResult\0224\n\023StreamInferenceI"
@@ -170,7 +170,7 @@ RequestItem::RequestItem(const RequestItem& from)
 
 void RequestItem::SharedCtor() {
 items_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-id_ = 0;
+id_ = uint64_t{0u};
 }
 
 RequestItem::~RequestItem() {
@@ -202,7 +202,7 @@ void RequestItem::Clear() {
   (void) cached_has_bits;
 
   items_.ClearToEmpty();
-  id_ = 0;
+  id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -221,7 +221,7 @@ const char* RequestItem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
         } else
           goto handle_unusual;
         continue;
-      // int32 id = 2;
+      // uint64 id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
@@ -264,10 +264,10 @@ failure:
         1, this->_internal_items(), target);
   }
 
-  // int32 id = 2;
+  // uint64 id = 2;
   if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -293,9 +293,9 @@ size_t RequestItem::ByteSizeLong() const {
         this->_internal_items());
   }
 
-  // int32 id = 2;
+  // uint64 id = 2;
   if (this->_internal_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_id());
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -388,7 +388,7 @@ ItemResult::ItemResult(const ItemResult& from)
 
 void ItemResult::SharedCtor() {
 results_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-id_ = 0;
+id_ = uint64_t{0u};
 }
 
 ItemResult::~ItemResult() {
@@ -420,7 +420,7 @@ void ItemResult::Clear() {
   (void) cached_has_bits;
 
   results_.ClearToEmpty();
-  id_ = 0;
+  id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -439,7 +439,7 @@ const char* ItemResult::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
         } else
           goto handle_unusual;
         continue;
-      // int32 id = 2;
+      // uint64 id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
@@ -482,10 +482,10 @@ failure:
         1, this->_internal_results(), target);
   }
 
-  // int32 id = 2;
+  // uint64 id = 2;
   if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -511,9 +511,9 @@ size_t ItemResult::ByteSizeLong() const {
         this->_internal_results());
   }
 
-  // int32 id = 2;
+  // uint64 id = 2;
   if (this->_internal_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_id());
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);

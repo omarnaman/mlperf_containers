@@ -210,13 +210,13 @@ class RequestItem final :
   std::string* _internal_mutable_items();
   public:
 
-  // int32 id = 2;
+  // uint64 id = 2;
   void clear_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 id() const;
-  void set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 id() const;
+  void set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_id() const;
-  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_id() const;
+  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:RequestItem)
@@ -227,7 +227,7 @@ class RequestItem final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr items_;
-  ::PROTOBUF_NAMESPACE_ID::int32 id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_basic_2eproto;
 };
@@ -369,13 +369,13 @@ class ItemResult final :
   std::string* _internal_mutable_results();
   public:
 
-  // int32 id = 2;
+  // uint64 id = 2;
   void clear_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 id() const;
-  void set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 id() const;
+  void set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_id() const;
-  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_id() const;
+  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:ItemResult)
@@ -386,7 +386,7 @@ class ItemResult final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr results_;
-  ::PROTOBUF_NAMESPACE_ID::int32 id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_basic_2eproto;
 };
@@ -733,22 +733,22 @@ inline void RequestItem::set_allocated_items(std::string* items) {
   // @@protoc_insertion_point(field_set_allocated:RequestItem.items)
 }
 
-// int32 id = 2;
+// uint64 id = 2;
 inline void RequestItem::clear_id() {
-  id_ = 0;
+  id_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 RequestItem::_internal_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 RequestItem::_internal_id() const {
   return id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 RequestItem::id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 RequestItem::id() const {
   // @@protoc_insertion_point(field_get:RequestItem.id)
   return _internal_id();
 }
-inline void RequestItem::_internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void RequestItem::_internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   id_ = value;
 }
-inline void RequestItem::set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void RequestItem::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_id(value);
   // @@protoc_insertion_point(field_set:RequestItem.id)
 }
@@ -803,22 +803,22 @@ inline void ItemResult::set_allocated_results(std::string* results) {
   // @@protoc_insertion_point(field_set_allocated:ItemResult.results)
 }
 
-// int32 id = 2;
+// uint64 id = 2;
 inline void ItemResult::clear_id() {
-  id_ = 0;
+  id_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 ItemResult::_internal_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ItemResult::_internal_id() const {
   return id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 ItemResult::id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ItemResult::id() const {
   // @@protoc_insertion_point(field_get:ItemResult.id)
   return _internal_id();
 }
-inline void ItemResult::_internal_set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void ItemResult::_internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   id_ = value;
 }
-inline void ItemResult::set_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void ItemResult::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_id(value);
   // @@protoc_insertion_point(field_set:ItemResult.id)
 }
