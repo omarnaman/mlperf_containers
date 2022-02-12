@@ -1,0 +1,3 @@
+[submodule "SUT/build/python/USPP"]
+	path = SUT/build/python/USPP
+	url = git@github.com:omarnaman/USPP.git
