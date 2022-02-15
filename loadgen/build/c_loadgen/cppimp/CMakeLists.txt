@@ -55,7 +55,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories("/home/onaman/.local/include/")
 
 # Find original mlperf library
-find_library(MLPERF_LIBRARY mlperf HINTS "${CMAKE_CURRENT_SOURCE_DIR}")
+find_library(MLPERF_LIBRARY mlperf_loadgen HINTS "${CMAKE_CURRENT_SOURCE_DIR}/../build")
 
 # basic_grpc_proto
 add_library(basic_grpc_proto ${basic_grpc_srcs} ${basic_grpc_hdrs}
@@ -74,6 +74,7 @@ target_link_libraries(
   ${_REFLECTION} ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF})
 
 add_dependencies(mlperf_lib_runner grpc_basic_client)
+add_dependencies(mlperf_lib_sut mlperf_lib_dataset)
 add_executable(loadgen cppimp.cpp)
 target_link_libraries(
   loadgen

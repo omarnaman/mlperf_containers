@@ -10,21 +10,12 @@
 #include <vector>
 
 #include "../query_sample.h"
-#include "dataset.h"
+#include "./dataset.h"
+#include "../runner.h"
 #include "lib/basic_client.h"
 #include "lib/thread_queue.h"
-class RunnerBase {
- protected:
- public:
-  int queries_sent;
-  Dataset* dataset;
-  RunnerBase(Dataset* dataset);
-  ~RunnerBase();
-  virtual mlperf::QuerySampleResponse predict(const Data* item) = 0;
-  virtual void runQuery(const std::vector<mlperf::QuerySample>& samples);
-};
 
-class RunnerRemote : public RunnerBase {
+class RunnerRemote : public mlperf::RunnerBase {
  protected:
   std::string remote_address;
   ushort remote_port;
@@ -32,13 +23,17 @@ class RunnerRemote : public RunnerBase {
 
  public:
   RunnerRemote(const std::string& address, const ushort& port,
-               Dataset* dataset);
+               mlperf::Dataset* dataset);
+  RunnerRemote(const RunnerRemote& src);
   ~RunnerRemote();
-  virtual mlperf::QuerySampleResponse predict(const Data* item) override;
+  virtual void init() override;
+  virtual mlperf::QuerySampleResponse predict(const mlperf::Data* item) override;
+  virtual mlperf::RunnerBase* clone() override;
+
   std::string targetString();
 };
 
-class RemoteStreamer : public RunnerBase {
+class RemoteStreamer : public mlperf::RunnerBase {
  private:
   std::string remote_address;
   ushort remote_port;
@@ -50,22 +45,26 @@ class RemoteStreamer : public RunnerBase {
 
  public:
   RemoteStreamer(const std::string& address, const ushort& port,
-                 Dataset* dataset);
+                 mlperf::Dataset* dataset);
+  RemoteStreamer(const RemoteStreamer& src);
   ~RemoteStreamer();
   // mlperf::QuerySampleResponse predict(const Data* item) override;
   virtual void runQuery(
       const std::vector<mlperf::QuerySample>& samples) override;
-  virtual mlperf::QuerySampleResponse predict(const Data* item) override;
+  virtual mlperf::QuerySampleResponse predict(const mlperf::Data* item) override;
   void receiveData();
+  virtual void init() override;
+  virtual mlperf::RunnerBase* clone() override;
+
   std::string targetString();
 };
 
-class SleepRunner : public RunnerBase {
+class SleepRunner : public mlperf::RunnerBase {
  private:
  public:
-  SleepRunner(Dataset* dataset);
+  SleepRunner(mlperf::Dataset* dataset);
   ~SleepRunner();
-  mlperf::QuerySampleResponse predict(const Data* item) override;
+  mlperf::QuerySampleResponse predict(const mlperf::Data* item) override;
 };
 
 #endif

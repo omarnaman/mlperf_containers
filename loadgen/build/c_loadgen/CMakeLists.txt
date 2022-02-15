@@ -30,10 +30,11 @@ message(STATUS "Using Python interpreter: ${PYTHON_EXECUTABLE}")
 # Generate source file with version info.
 execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/version_generator.py ${CMAKE_BINARY_DIR}/version_generated.cc ${CMAKE_CURRENT_SOURCE_DIR})
 
+# add_subdirectory(cppimp)
 # Add source files.
 set(SOURCE
-  ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.cc
+  # ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.h
+  # ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/issue_query_controller.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/loadgen.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/logging.cc
@@ -44,6 +45,11 @@ set(SOURCE
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/version.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/version.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/runner.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/runner.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/dataset.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/dataset.cpp
+
   ${CMAKE_BINARY_DIR}/version_generated.cc
 )
 

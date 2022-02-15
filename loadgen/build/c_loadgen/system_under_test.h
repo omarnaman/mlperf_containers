@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "query_sample.h"
+#include "runner.h"
 
 namespace mlperf {
 
@@ -47,7 +48,8 @@ class SystemUnderTest {
   /// cases properly.
   /// Note: The data for neighboring samples may or may not be contiguous
   /// depending on the scenario.
-  virtual void IssueQuery(const std::vector<QuerySample>& samples) = 0;
+  virtual void IssueQuery(const std::vector<QuerySample>& samples,
+                          size_t thread_idx = 0) = 0;
 
   /// \brief Called immediately after the last call to IssueQuery
   /// in a series is made.
@@ -63,6 +65,8 @@ class SystemUnderTest {
   /// recorded by the load generator. Units are nanoseconds.
   virtual void ReportLatencyResults(
       const std::vector<QuerySampleLatency>& latencies_ns) = 0;
+  RunnerBase* runner;
+
 };
 
 /// @}

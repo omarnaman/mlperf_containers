@@ -1,24 +1,29 @@
 #ifndef DMLPERF_SUT_H
 #define DMLPERF_SUT_H
 
+#include <vector>
+#include <thread>
+
+
 #include "../query_sample_library.h"
 #include "../system_under_test.h"
 #include "runner.h"
+#include "dataset.h"
 
 using namespace mlperf;
 class SUT : public SystemUnderTest {
  public:
   const std::string& Name() const override;
-  void IssueQuery(const std::vector<QuerySample>& samples) override;
+  void IssueQuery(const std::vector<QuerySample>& samples, size_t thread_idx = 0) override;
   void FlushQueries() override;
   void ReportLatencyResults(
       const std::vector<QuerySampleLatency>& latencies_ns) override;
-  SUT(RunnerBase* runner);
+  SUT(RunnerBase* runner, size_t n_threads);
   ~SUT();
 
  private:
   std::string name;
-  RunnerBase* runner;
+  std::vector<std::thread> threads;
 };
 
 class QSL : public QuerySampleLibrary {
@@ -31,12 +36,13 @@ class QSL : public QuerySampleLibrary {
   void UnloadSamplesFromRam(
       const std::vector<QuerySampleIndex>& samples) override;
 
-  QSL(size_t total_sample_count, size_t performance_sample_count);
+  QSL(size_t total_sample_count, size_t performance_sample_count, Dataset* dataset);
 
   ~QSL();
 
  private:
   std::string name;
+  Dataset* dataset;
   size_t total_sample_count;
   size_t performance_sample_count;
 };

@@ -6,51 +6,26 @@
 #include <thread>
 #include <vector>
 
+#include "../issue_query_controller.h"
 #include "../loadgen.h"
 #include "../query_sample.h"
 #include "../query_sample_library.h"
-#include "dataset.h"
+#include "./dataset.h"
 #include "lib/basic_client.h"
 
-RunnerBase::RunnerBase(Dataset* dataset) {
-  puts("RunnerBase Constructor");
-  this->dataset = dataset;
-  queries_sent = 0;
-}
-RunnerBase::~RunnerBase() { puts("RunnerRemote Constructor"); }
+/*********************************************************************/
 
-void RunnerBase::runQuery(const std::vector<mlperf::QuerySample>& samples) {
-  std::vector<mlperf::QuerySampleResponse> responses;
-  for (auto i = samples.begin(); i != samples.end(); i++) {
-    Data* item = dataset->getSample(i->index);
-    mlperf::QuerySampleResponse r = predict(item);
-    r.id = i->id;
-    responses.push_back(r);
-  }
-  for (size_t i = 0; i < 5; i++) {
-    queries_sent++;
-    mlperf::QuerySamplesComplete(responses.data(), responses.size());
-  }
-}
-mlperf::QuerySampleResponse RunnerRemote::predict(const Data* item) {
-  int res = client->predict(item->data, item->size);
-  if (res) {
-    std::cerr << "Yikes\n";
-  }
-  return mlperf::QuerySampleResponse{
-      .id = 0, .data = (uintptr_t)item->data, .size = item->size};
-}
-mlperf::QuerySampleResponse RemoteStreamer::predict(const Data* item) {
-  return mlperf::QuerySampleResponse{
-      .id = 0, .data = (uintptr_t)item->data, .size = item->size};
+using namespace mlperf;
+
+QuerySampleResponse RunnerRemote::predict(const Data* item) {
+  RequestData* res = client->predict(item->data, item->size, item->id);
+  assert(res);
+  this->dataset->postProcess(res->items, res->size);
+  return QuerySampleResponse{
+      .id = res->id, .data = (uintptr_t)res->items, .size = res->size};
 }
 
 std::string RunnerRemote::targetString() {
-  std::stringstream ss;
-  ss << remote_address << ":" << remote_port;
-  return ss.str();
-}
-std::string RemoteStreamer::targetString() {
   std::stringstream ss;
   ss << remote_address << ":" << remote_port;
   return ss.str();
@@ -60,31 +35,53 @@ RunnerRemote::RunnerRemote(const std::string& address, const ushort& port,
                            Dataset* dataset)
     : RunnerBase(dataset), remote_address(address), remote_port(port) {
   puts("RunnerRemote Constructor");
-  client = new BasicServiceClient(
-      grpc::CreateChannel(targetString(), grpc::InsecureChannelCredentials()));
+}
+
+RunnerRemote::RunnerRemote(const RunnerRemote& src) : RunnerBase(src) {
+  this->remote_address = src.remote_address;
+  this->remote_port = src.remote_port;
 }
 
 RunnerRemote::~RunnerRemote() { puts("RunnerRemote Constructor"); }
 
+void RunnerRemote::init() {
+  client = new BasicServiceClient(
+      grpc::CreateChannel(targetString(), grpc::InsecureChannelCredentials()));
+}
+
+RunnerBase* RunnerRemote::clone() {
+  RunnerBase* new_runner = new RunnerRemote(*this);
+  puts("Cloning RunnerRemote");
+  return new_runner;
+}
+
+/*********************************************************************/
 RemoteStreamer::RemoteStreamer(const std::string& address, const ushort& port,
                                Dataset* dataset)
     : RunnerBase(dataset), remote_address(address), remote_port(port) {
   puts("RemoteStreamer Constructor");
   // sender = new std::thread(streamData);
-  clientStreamer = new BasicServiceClientStreamer(
-      grpc::CreateChannel(targetString(), grpc::InsecureChannelCredentials()));
-  receiver = new std::thread([this] { receiveData(); });
 }
 
-// mlperf::QuerySampleResponse RemoteStreamer::predict(const Data* item) {
-//   {
-//     std::lock_guard<std::mutex> lk(mt);
-//     _q.push(item);
-//   }
-//   cv.notify_one();
-// }
-void RemoteStreamer::runQuery(const std::vector<mlperf::QuerySample>& samples) {
-  std::vector<mlperf::QuerySampleResponse> responses;
+RemoteStreamer::RemoteStreamer(const RemoteStreamer& src) : RunnerBase(src) {
+  this->remote_address = src.remote_address;
+  this->remote_port = src.remote_port;
+}
+
+QuerySampleResponse RemoteStreamer::predict(const Data* item) {
+  assert(false && "This should not be called. call runQuery instead");
+  return QuerySampleResponse{
+      .id = 0, .data = (uintptr_t)item->data, .size = item->size};
+}
+
+std::string RemoteStreamer::targetString() {
+  std::stringstream ss;
+  ss << remote_address << ":" << remote_port;
+  return ss.str();
+}
+
+void RemoteStreamer::runQuery(const std::vector<QuerySample>& samples) {
+  std::vector<QuerySampleResponse> responses;
   for (auto i = samples.begin(); i != samples.end(); i++) {
     Data* item = dataset->getSample(i->index);
 
@@ -98,21 +95,32 @@ void RemoteStreamer::receiveData() {
   while (true) {
     RequestData response = clientStreamer->getResponse();
     puts("RemoteStreamer: got response");
-    mlperf::QuerySampleResponse* querySampleResponse =
-        new mlperf::QuerySampleResponse{.id = response.id,
+    QuerySampleResponse* querySampleResponse =
+        new QuerySampleResponse{.id = response.id,
                                         .data = (uintptr_t)response.items,
                                         .size = response.size};
-    mlperf::QuerySamplesComplete(querySampleResponse, 1);
+    QuerySamplesComplete(querySampleResponse, 1);
   }
 }
+void RemoteStreamer::init() {
+  clientStreamer = new BasicServiceClientStreamer(
+      grpc::CreateChannel(targetString(), grpc::InsecureChannelCredentials()));
+  receiver = new std::thread([this] { receiveData(); });
+}
 
+RunnerBase* RemoteStreamer::clone() {
+  RunnerBase* new_runner = new RemoteStreamer(*this);
+  return new_runner;
+}
+
+/*********************************************************************/
 SleepRunner::SleepRunner(Dataset* dataset) : RunnerBase(dataset) {
   puts("SleepRunner Constructor");
 }
 SleepRunner::~SleepRunner() {}
-mlperf::QuerySampleResponse SleepRunner::predict(const Data* item) {
+QuerySampleResponse SleepRunner::predict(const Data* item) {
   printf("Sleeping for %d us\n", *(int*)item->data);
   usleep(*(int*)item->data);
-  return mlperf::QuerySampleResponse{
+  return QuerySampleResponse{
       .id = 0, .data = (uintptr_t)item->data, .size = item->size};
 }

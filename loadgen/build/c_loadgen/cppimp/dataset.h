@@ -2,55 +2,62 @@
 #define DMLPERF_DATASET_H
 
 #include <stdint.h>
+
 #include <string>
-
 #include <vector>
-struct Data {
-  char* data;
-  size_t size;
-  int label;
-  uintptr_t id;
-};
-class Dataset {
- public:
-  std::vector<Data*>* dataPoints;
-  Dataset();
-  ~Dataset();
-  virtual void loadDataset() = 0;
-  virtual Data* getSample(const int& index) = 0;
-};
+#include "../dataset.h"
 
-class SyntheticDataset : public Dataset {
+class SyntheticDataset : public mlperf::Dataset {
  private:
  public:
   SyntheticDataset();
   ~SyntheticDataset();
 
   void loadDataset() override;
-  Data* getSample(const int& index) override;
+
+  mlperf::Data* getSample(const int& index) override;
 };
 
-class StringDataset : public Dataset {
+class StringDataset : public mlperf::Dataset {
  private:
  public:
   StringDataset();
   ~StringDataset();
 
   void loadDataset() override;
-  Data* getSample(const int& index) override;
+  mlperf::Data* getSample(const int& index) override;
 };
 
-class CocoDataset : public Dataset {
+class CocoDataset : public mlperf::Dataset {
  private:
   std::string labelsPath = "coco/lables";
   std::string imageDir = "coco/images/";
   std::vector<std::string> listDir(const std::string& dir_path);
+  std::vector<std::string>* dataPointPath;
+
  public:
   CocoDataset(std::string& labels_path, std::string& image_dir);
   ~CocoDataset();
 
   void loadDataset() override;
-  Data* getSample(const int& index) override;
+  void loadSamples(const std::vector<size_t>& samples) override;
+  mlperf::Data* getSample(const int& index) override;
+  void postProcess(const char* data, size_t size) override;
+};
+
+class PreprocessedDataset : public mlperf::Dataset {
+ private:
+  std::vector<std::string> listDir(const std::string& dir_path);
+  std::vector<std::string>* dataPointPath;
+  std::string dataPath;
+
+ public:
+  PreprocessedDataset(std::string& data_dir);
+  ~PreprocessedDataset();
+
+  void loadDataset() override;
+  void loadSamples(const std::vector<size_t>& samples) override;
+  mlperf::Data* getSample(const int& index) override;
 };
 
 #endif

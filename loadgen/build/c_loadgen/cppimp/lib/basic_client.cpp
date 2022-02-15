@@ -2,9 +2,9 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <utility>
 #include <sstream>
-#include <cli_colors.h>
+#include <utility>
+
 #include "basic.grpc.pb.h"
 
 using grpc::Channel;
@@ -15,22 +15,29 @@ using grpc::Status;
 BasicServiceClient::BasicServiceClient(std::shared_ptr<Channel> channel)
     : stub_(BasicService::NewStub(channel)) {}
 
-int BasicServiceClient::predict(const char* items, const size_t size) {
+RequestData* BasicServiceClient::predict(const char* items, const size_t size,
+                                         uintptr_t id) {
   RequestItem request;
   request.set_items((char*)items, size);
-  request.set_id(0);
+  request.set_id(id);
   ItemResult reply;
 
   ClientContext context;
 
   Status status = stub_->InferenceItem(&context, request, &reply);
-
   if (status.ok()) {
-    return 0;
+    std::string results_items = reply.results();
+    size_t size = results_items.size();
+    RequestData* r = new RequestData();
+    r->items = new char[size];
+    memcpy(r->items, results_items.data(), size);
+    r->size = size;
+    r->id = reply.id();
+    return r;
   } else {
     std::cout << status.error_code() << ": " << status.error_message()
               << std::endl;
-    return 1;
+    return NULL;
   }
 }
 
@@ -53,19 +60,16 @@ void BasicServiceClientStreamer::sendRequests() {
     {
       std::unique_lock<std::mutex> lk(requestMt);
       requestPushed.wait(lk, [this]() { return this->hasRequests(); });
-      clic::color_print("sendRequests got an item", clic::CYAN);
       requestData = requestQueue.front();
       requestQueue.pop();
     }
     items = requestData->items;
     size = requestData->size;
     id = requestData->id;
-    std::cout << "Sending Item with id: " << id << std::endl;
     RequestItem requestItem;
     requestItem.set_items(items, size);
     requestItem.set_id(id);
     stream->Write(requestItem);
-    puts("item sent");
   }
 }
 void BasicServiceClientStreamer::sendRequest(const RequestData* items) {
@@ -74,8 +78,7 @@ void BasicServiceClientStreamer::sendRequest(const RequestData* items) {
   // puts("Request Pushed");
   std::stringstream ss;
   ss << "Request Pushed with ID: " << items->id;
-  clic::color_print(ss.str(), clic::RED);
-  
+
   requestPushed.notify_one();
 }
 
@@ -89,8 +92,8 @@ void BasicServiceClientStreamer::receiveResponse() {
   while (stream->Read(&itemResult)) {
     std::lock_guard<std::mutex> lk(responseMt);
     puts("Got Response");
-    responseQueue.push(RequestData{
-        .items = NULL, .size = 0, .id = itemResult.id()});
+    responseQueue.push(
+        RequestData{.items = NULL, .size = 0, .id = itemResult.id()});
     responsePushed.notify_one();
   }
 }

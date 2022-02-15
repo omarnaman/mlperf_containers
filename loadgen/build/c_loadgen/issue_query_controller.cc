@@ -15,18 +15,20 @@ limitations under the License.
 /// query issuing.
 
 #include "issue_query_controller.h"
+#include "runner.h"
 
 #include <sstream>
+#include <iostream>
 
 namespace mlperf {
 
+// template <TestScenario scenario>
 void RegisterIssueQueryThread() {
-  loadgen::IssueQueryController::GetInstance().RegisterThread();
+  loadgen::IssueQueryController::GetInstance().RegisterThread<TestScenario::SingleStream>();
 }
 
 /// \brief Loadgen implementation details.
 namespace loadgen {
-
 QueryMetadata::QueryMetadata(
     const std::vector<QuerySampleIndex>& query_sample_indices,
     std::chrono::nanoseconds scheduled_delta,
@@ -43,6 +45,23 @@ QueryMetadata::QueryMetadata(
   query_to_send.reserve(query_sample_indices.size());
   for (auto& s : samples_) {
     query_to_send.push_back({reinterpret_cast<ResponseId>(&s), s.sample_index});
+  }
+}
+
+
+QueryMetadata::QueryMetadata(QueryMetadata& src, SequenceGen* sequence_gen)
+      :scheduled_delta(src.scheduled_delta),
+      response_delegate(src.response_delegate),
+      sequence_id(sequence_gen->NextQueryId()),
+      wait_count_(src.samples_.size()) {
+      samples_.reserve(wait_count_);
+    query_to_send.reserve(wait_count_);
+    for (auto&& sample : src.samples_) {
+      samples_.push_back({this, sequence_gen->NextSampleId(), sample.sample_index,
+                          sample.accuracy_log_val});
+    }
+    for (auto&& sample : samples_) {
+    query_to_send.push_back({reinterpret_cast<ResponseId>(&sample), sample.sample_index});
   }
 }
 
@@ -272,6 +291,7 @@ IssueQueryController& IssueQueryController::GetInstance() {
   return instance;
 }
 
+template <TestScenario scenario>
 void IssueQueryController::RegisterThread() {
   // Push this thread to thread queue.
   auto thread_id = std::this_thread::get_id();
@@ -309,7 +329,7 @@ void IssueQueryController::RegisterThread() {
 
     // Start issuing queries.
     if (thread_idx <= num_threads) {
-      IssueQueriesInternal<TestScenario::Server, true>(num_threads, thread_idx);
+      IssueQueriesInternal<scenario, true>(num_threads, thread_idx);
       {
         std::lock_guard<std::mutex> lock(mtx);
         thread_complete[thread_idx] = true;
@@ -360,10 +380,7 @@ void IssueQueryController::StartIssueQueries(IssueQueryState* s) {
   state->start_for_power = std::chrono::system_clock::now();
   state->start_time = PerfClock::now();
 
-  if (scenario != TestScenario::Server || num_threads == 0) {
-    // Usually, we just use the same thread to issue queries.
-    IssueQueriesInternal<scenario, false>(1, 0);
-  } else {
+  if (num_threads != 0) {
     // If server_num_issue_query_threads is non-zero, issue queries on the
     // registered threads.
     // Tell all threads to start issuing queries.
@@ -383,6 +400,9 @@ void IssueQueryController::StartIssueQueries(IssueQueryState* s) {
       issuing = false;
     }
     cond_var.notify_all();
+  } else {
+    // Usually, we just use the same thread to issue queries.
+    IssueQueriesInternal<scenario, false>(1, 0);
   }
 }
 
@@ -413,7 +433,9 @@ void IssueQueryController::IssueQueriesInternal(size_t query_stride,
   auto sut = state->sut;
   auto& queries = *state->queries;
   auto& response_logger = *state->response_delegate;
-
+  auto runner = sut->runner->clone();
+  runner->init();
+  
   // Some book-keeping about the number of queries issued.
   size_t queries_issued = 0;
   size_t queries_issued_per_iter = 0;
@@ -480,7 +502,7 @@ void IssueQueryController::IssueQueriesInternal(size_t query_stride,
     {
       auto tracer3 =
           MakeScopedTracer([](AsyncTrace& trace) { trace("IssueQuery"); });
-      sut->IssueQuery(query.query_to_send);
+      runner->runQuery(query.query_to_send);
     }
 
     // Increment the counter.

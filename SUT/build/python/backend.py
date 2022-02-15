@@ -10,6 +10,12 @@ class Backend():
         self.inputs = []
         self.outputs = []
 
+    def serialize_response(self, res):
+        return b"" 
+    
+    def parse_query(self, query):
+        return query
+
     def version(self):
         raise NotImplementedError("Backend:version")
 

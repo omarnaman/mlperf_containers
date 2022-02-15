@@ -10,9 +10,13 @@
 #include "runner.h"
 using namespace mlperf;
 
+// void StartIssueThread() {
+//     RegisterIssueQueryThread();
+// }
+
 // SUT implementation
 const std::string& SUT::Name() const { return name; }
-void SUT::IssueQuery(const std::vector<QuerySample>& samples) {
+void SUT::IssueQuery(const std::vector<QuerySample>& samples, size_t thread_idx) {
   runner->runQuery(samples);
   // // std::cout << "Sent a query\n";
   // std::vector<QuerySampleResponse> responses;
@@ -30,13 +34,22 @@ void SUT::IssueQuery(const std::vector<QuerySample>& samples) {
 void SUT::FlushQueries() { std::cout << "Flushed queries\n"; }
 void SUT::ReportLatencyResults(
     const std::vector<QuerySampleLatency>& latencies_ns) {
-  std::cout << "Reporting results\n" << runner->queries_sent << "\n";
+  std::cout << "Reporting results\n";
 }
-SUT::SUT(RunnerBase* runner) {
+SUT::SUT(RunnerBase* runner, size_t n_threads) {
   name = "sut_cpp";
   this->runner = runner;
+  for (size_t i = 0; i < n_threads; i++) {
+    threads.emplace_back(RegisterIssueQueryThread);
+  }
 }
-SUT::~SUT() {}
+SUT::~SUT() {
+  for (auto &&thread : threads)
+  {
+    thread.join();
+  }
+  
+}
 
 // QSL implementation
 
@@ -44,12 +57,17 @@ const std::string& QSL::Name() const { return name; }
 size_t QSL::TotalSampleCount() { return total_sample_count; }
 size_t QSL::PerformanceSampleCount() { return performance_sample_count; }
 
-void QSL::LoadSamplesToRam(const std::vector<QuerySampleIndex>& samples) {}
+void QSL::LoadSamplesToRam(const std::vector<QuerySampleIndex>& samples) {
+  printf("Loading into ram %u samples\n", samples.size());
+  this->dataset->loadSamples(samples);
+}
 void QSL::UnloadSamplesFromRam(const std::vector<QuerySampleIndex>& samples) {}
 
-QSL::QSL(size_t total_sample_count, size_t performance_sample_count) {
+QSL::QSL(size_t total_sample_count, size_t performance_sample_count,
+         Dataset* dataset) {
   this->total_sample_count = total_sample_count;
   this->performance_sample_count = performance_sample_count;
+  this->dataset = dataset;
   name = "qsl_cpp";
 };
 

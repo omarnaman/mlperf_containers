@@ -21,12 +21,12 @@ limitations under the License.
 #include <cstring>
 #include <ctime>
 #include <fstream>
-#include <sstream>
 #include <future>
 #include <iomanip>
 #include <iostream>
 #include <queue>
 #include <random>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -87,8 +87,10 @@ struct ResponseDelegateDetailed : public ResponseDelegate {
       uint8_t* src_end = src_begin + response->size;
       sample_data_copy = new std::vector<uint8_t>(src_begin, src_end);
     }
-    bool deadline_missed = (response->size == std::numeric_limits<size_t>::max())? true: false;
-    Log([sample, complete_begin_time, sample_data_copy, deadline_missed](AsyncLog& log) {
+    bool deadline_missed =
+        (response->size == std::numeric_limits<size_t>::max()) ? true : false;
+    Log([sample, complete_begin_time, sample_data_copy,
+         deadline_missed](AsyncLog& log) {
       QueryMetadata* query = sample->query_metadata;
       DurationGeneratorNs sched{query->scheduled_time};
 
@@ -202,7 +204,7 @@ std::vector<QueryMetadata> GenerateQueries(
   std::chrono::microseconds gen_duration =
       duration_multiplier * settings.target_duration;
   size_t min_queries = settings.min_query_count;
-
+  const size_t num_threads = settings.num_threads;
   size_t samples_per_query = settings.samples_per_query;
   if (mode == TestMode::AccuracyOnly && scenario == TestScenario::Offline) {
     samples_per_query = loaded_sample_set.sample_distribution_end;
@@ -250,9 +252,9 @@ std::vector<QueryMetadata> GenerateQueries(
     if (kIsMultiStream) {
       QuerySampleIndex sample_i = settings.performance_issue_unique
                                       ? sample_distribution_unique(sample_rng)
-                                      : settings.performance_issue_same
-                                            ? same_sample
-                                            : sample_distribution(sample_rng);
+                                  : settings.performance_issue_same
+                                      ? same_sample
+                                      : sample_distribution(sample_rng);
       for (auto& s : samples) {
         // Select contiguous samples in the MultiStream scenario.
         // This will not overflow, since GenerateLoadableSets adds padding at
@@ -284,14 +286,17 @@ std::vector<QueryMetadata> GenerateQueries(
       }
     } else {
       for (auto& s : samples) {
-        s = loaded_samples[settings.performance_issue_unique
-                               ? sample_distribution_unique(sample_rng)
-                               : settings.performance_issue_same
-                                     ? same_sample
-                                     : sample_distribution(sample_rng)];
+        s = loaded_samples[
+          settings.performance_issue_unique ? sample_distribution_unique(sample_rng)
+          : settings.performance_issue_same ? same_sample
+          : sample_distribution(sample_rng)];
       }
     }
     queries.emplace_back(samples, timestamp, response_delegate, sequence_gen);
+    for (size_t i = 0; i <  num_threads - (num_threads? 1:0); i++) {
+      queries.emplace_back(queries.back(), sequence_gen);
+    }
+
     prev_timestamp = timestamp;
     timestamp += schedule_distribution(schedule_rng);
   }
@@ -394,7 +399,7 @@ PerformanceResult IssueQueries(SystemUnderTest* sut,
   auto& controller = IssueQueryController::GetInstance();
 
   // Set number of IssueQueryThreads and wait for the threads to register.
-  controller.SetNumThreads(settings.requested.server_num_issue_query_threads);
+  controller.SetNumThreads(settings.requested.generic_num_issue_query);
 
   // Start issuing the queries.
   controller.StartIssueQueries<scenario>(&state);
@@ -879,13 +884,13 @@ void PerformanceSummary::LogDetail(AsyncDetail& detail) {
   auto reportPerQueryLatencies = [&]() {
     for (auto& lp : latency_percentiles) {
       std::string percentile = DoubleToString(lp.percentile * 100);
+      MLPERF_LOG(
+          detail,
+          "result_" + percentile + "_percentile_num_intervals_between_queries",
+          lp.query_intervals);
       MLPERF_LOG(detail,
-                  "result_" + percentile +
-                      "_percentile_num_intervals_between_queries",
-                  lp.query_intervals);
-      MLPERF_LOG(detail,
-                  "result_" + percentile + "_percentile_per_query_latency_ns",
-                  lp.query_latency);
+                 "result_" + percentile + "_percentile_per_query_latency_ns",
+                 lp.query_latency);
     }
   };
 

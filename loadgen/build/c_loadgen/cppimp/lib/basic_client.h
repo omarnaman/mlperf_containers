@@ -27,7 +27,7 @@ struct RequestData{
 class BasicServiceClient {
  public:
   BasicServiceClient(std::shared_ptr<Channel> channel);
-  int predict(const char* items, const size_t size);
+  RequestData* predict(const char* items, const size_t size, uintptr_t id);
 
  private:
   std::unique_ptr<BasicService::Stub> stub_;

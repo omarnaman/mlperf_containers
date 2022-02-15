@@ -87,7 +87,10 @@ class QueryMetadata {
   QueryMetadata(const std::vector<QuerySampleIndex>& query_sample_indices,
                 std::chrono::nanoseconds scheduled_delta,
                 ResponseDelegate* response_delegate, SequenceGen* sequence_gen);
+  QueryMetadata(QueryMetadata& src, SequenceGen* sequence_gen);
   QueryMetadata(QueryMetadata&& src);
+
+  QueryMetadata* Clone(QueryMetadata&& src);
 
   void NotifyOneSampleCompleted(PerfClock::time_point timestamp);
 
@@ -162,6 +165,7 @@ class IssueQueryController {
 
   /// \brief Register an IssueQueryThread.
   /// It is blocking until the entire test ends.
+  template <TestScenario scenario>
   void RegisterThread();
 
   /// \brief Set number of IssueQueryThreads and wait for thread registration.
