@@ -68,4 +68,4 @@ RUN cd /workspace/loadgen/build/c_loadgen && \
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build
-ENTRYPOINT ["bash", "./run_loadgen.sh"]
+ENTRYPOINT ["bash", "./run_loadgen_py.sh"]
