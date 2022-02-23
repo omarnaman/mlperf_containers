@@ -5,7 +5,7 @@
 
 #include <string>
 #include <vector>
-#include "../dataset.h"
+#include "../c_loadgen/dataset.h"
 
 class SyntheticDataset : public mlperf::Dataset {
  private:

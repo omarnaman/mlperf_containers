@@ -25,6 +25,8 @@ include(./common.cmake)
 # Proto file get_filename_component(basic_proto "../basic.proto" ABSOLUTE)
 # get_filename_component(basic_proto_path "${basic_proto}" PATH)
 
+set(loadgen_component ../c_loadgen)
+
 # MLPerf sources
 set(mlperf_dataset_src dataset.cpp)
 set(mlperf_dataset_hdr dataset.h)
@@ -43,19 +45,14 @@ set(basic_proto_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.cc")
 set(basic_proto_hdrs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.h")
 set(basic_grpc_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.grpc.pb.cc")
 set(basic_grpc_hdrs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.grpc.pb.h")
-# add_custom_command( OUTPUT "${basic_proto_srcs}" "${basic_proto_hdrs}"
-# "${basic_grpc_srcs}" "${basic_grpc_hdrs}" COMMAND ${_PROTOBUF_PROTOC} ARGS
-# --grpc_out "${CMAKE_CURRENT_BINARY_DIR}" --cpp_out
-# "${CMAKE_CURRENT_BINARY_DIR}" -I "${basic_proto_path}"
-# --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}" "${basic_proto}"
-# DEPENDS "${basic_proto}")
+
 
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-include_directories("/home/onaman/.local/include/")
+include_directories("$ENV{HOME}/.local/include/")
 
 # Find original mlperf library
-find_library(MLPERF_LIBRARY mlperf_loadgen HINTS "${CMAKE_CURRENT_SOURCE_DIR}/../build")
+find_library(MLPERF_LIBRARY mlperf_loadgen HINTS "${loadgen_component}/build")
 
 # basic_grpc_proto
 add_library(basic_grpc_proto ${basic_grpc_srcs} ${basic_grpc_hdrs}

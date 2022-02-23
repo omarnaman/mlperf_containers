@@ -6,10 +6,10 @@
 #include <string>
 #include <thread>
 
-#include "../loadgen.h"
-#include "../query_sample_library.h"
-#include "../system_under_test.h"
-#include "../test_settings.h"
+#include "../c_loadgen/loadgen.h"
+#include "../c_loadgen/query_sample_library.h"
+#include "../c_loadgen/system_under_test.h"
+#include "../c_loadgen/test_settings.h"
 #include "dataset.h"
 #include "sut.h"
 #include "lib/basic.grpc.pb.h"

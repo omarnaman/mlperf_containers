@@ -9,9 +9,9 @@
 #include <thread>
 #include <vector>
 
-#include "../query_sample.h"
+#include "../c_loadgen/query_sample.h"
 #include "./dataset.h"
-#include "../runner.h"
+#include "../c_loadgen/runner.h"
 #include "lib/basic_client.h"
 #include "lib/thread_queue.h"
 

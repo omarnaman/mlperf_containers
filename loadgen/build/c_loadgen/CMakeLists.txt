@@ -30,7 +30,6 @@ message(STATUS "Using Python interpreter: ${PYTHON_EXECUTABLE}")
 # Generate source file with version info.
 execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/version_generator.py ${CMAKE_BINARY_DIR}/version_generated.cc ${CMAKE_CURRENT_SOURCE_DIR})
 
-# add_subdirectory(cppimp)
 # Add source files.
 set(SOURCE
   # ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.h
