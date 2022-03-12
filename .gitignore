@@ -9,9 +9,10 @@ loadgen/build/c_loadgen/build
 __pycache__/
 generated/
 *.npy
+*.bytes
 *.png
 *.jpg
-loadgen/build/c_loadgen/cppimp/build
+loadgen/build/cppimp/build
 *.a
 CMakeLists.txt.user
 CMakeCache.txt

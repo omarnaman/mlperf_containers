@@ -49,7 +49,16 @@ set(basic_grpc_hdrs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.grpc.pb.h")
 
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-include_directories("$ENV{HOME}/.local/include/")
+
+if($ENV{DOCKER_CMAKE})
+  message(STATUS "INCLUDING INSIDE DOCKER")
+  include_directories("$ENV{LIB_INSTALL_DIR}/include")
+  else()
+  message(STATUS "INCLUDING OUTSIDE DOCKER")
+  include_directories("$ENV{HOME}/.local/include/")
+  endif()
+
+message("DIRECTORIES INCLUDED=${INCLUDE_DIRECTORIES}")
 
 # Find original mlperf library
 find_library(MLPERF_LIBRARY mlperf_loadgen HINTS "${loadgen_component}/build")

@@ -13,7 +13,6 @@ RUN apt-get update && \
             wget \
             python3-opencv \
             cmake \
-            build-essential \ 
             unzip zip \
             sed \
             curl \
