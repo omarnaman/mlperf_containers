@@ -54,6 +54,9 @@ def get_backend(backend):
     elif backend == "tflite":
         from backend_tflite import BackendTflite
         backend = BackendTflite()
+    elif backend == "uspp":
+        from backend_uspp import BackendUSPP
+        backend = BackendUSPP()
     else:
         raise ValueError("unknown backend: " + backend)
     return backend
@@ -72,16 +75,17 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
         super().__init__()
 
     def InferenceItem(self, request: basic_pb2.RequestItem, context: grpc.ServicerContext):
-        items = pickle.loads(request.items)
+        items = self.backend.parse_query(request.items)
         results = self.model.predict({self.model.inputs[0]: items})
-        results = pickle.dumps((results, 0), protocol=0)
-        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results)
+        
+        results = self.backend.serialize_response(results)
+        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
         return response
     
     def _inferenceItem(self, request: basic_pb2.RequestItem):
-        items = pickle.loads(request.items)
+        items = self.backend.parse_query(request.items)
         results = self.model.predict({self.model.inputs[0]: items})
-        results = pickle.dumps((results, 0), protocol=0)
+        results = self.backend.serialize_response(results)
         response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
         return response
 

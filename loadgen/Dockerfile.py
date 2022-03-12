@@ -13,7 +13,6 @@ RUN apt-get update && \
             wget \
             python3-opencv \
             cmake \
-            build-essential \ 
             unzip zip \
             sed \
             curl \
@@ -68,4 +67,4 @@ RUN cd /workspace/loadgen/build/c_loadgen && \
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build
-ENTRYPOINT ["bash", "./run_loadgen.sh"]
+ENTRYPOINT ["bash", "./run_loadgen_py.sh"]

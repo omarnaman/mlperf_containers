@@ -4,9 +4,9 @@ onnxruntime backend (https://github.com/microsoft/onnxruntime)
 
 # pylint: disable=unused-argument,missing-docstring,useless-super-delegation
 
-import onnxruntime as rt
-
 import backend
+import numpy as np
+import onnxruntime as rt
 
 
 class BackendOnnxruntime(backend.Backend):
@@ -44,7 +44,22 @@ class BackendOnnxruntime(backend.Backend):
         else:
             self.outputs = outputs
         return self
-        
+    
+    def parse_query(self, items: bytes) -> np.ndarray:
+        items = np.frombuffer(items, np.uint8)
+        items.shape = (1, 300, 300, 3)
+        return items
+
+    def serialize_response(self, res: np.ndarray) -> bytes:
+        """
+        (1,)        float32 number of objects
+        (1, 100, 4) float32 bounding boxes
+        (1, 100)    float32 confidence
+        (1, 100)    float32 classes (labels)
+        """
+        results = res[0].tobytes() + res[2].tobytes() + res[3].tobytes() + res[1].tobytes()
+        return results
+
     def predict(self, feed):
         """Run the prediction."""
         return self.sess.run(self.outputs, feed)

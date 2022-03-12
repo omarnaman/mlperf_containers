@@ -32,8 +32,8 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/version
 
 # Add source files.
 set(SOURCE
-  ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.cc
+  # ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.h
+  # ${CMAKE_CURRENT_SOURCE_DIR}/bindings/c_api.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/issue_query_controller.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/loadgen.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/logging.cc
@@ -44,6 +44,11 @@ set(SOURCE
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/version.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/version.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/runner.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/runner.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/dataset.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/dataset.cpp
+
   ${CMAKE_BINARY_DIR}/version_generated.cc
 )
 

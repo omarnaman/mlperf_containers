@@ -7,12 +7,12 @@ service BasicService {
 
 message RequestItem {
     bytes items = 1;
-    int32 id = 2;
+    uint64 id = 2;
 }
 
 message ItemResult {
     bytes results = 1;
-    int32 id = 2;
+    uint64 id = 2;
 }
 
 message ThreadRequest {

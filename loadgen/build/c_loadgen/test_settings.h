@@ -147,6 +147,15 @@ struct TestSettings {
   TestMode mode = TestMode::PerformanceOnly;
 
   // ==================================
+  /// \name Generic settings
+  /**@{*/
+  /// \brief The number of threads/client that send queries to SUT, this
+  /// should be preceeded by registering the same number of threads using
+  /// \ref mlperf::RegisterIssueQueryThread() 
+  size_t generic_num_issue_query = 0;
+  /**@}*/
+
+  // ==================================
   /// \name SingleStream-specific
   /**@{*/
   /// \brief A hint used by the loadgen to pre-generate enough samples to
