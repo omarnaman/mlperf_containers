@@ -16,7 +16,7 @@
 
 using namespace mlperf;
 
-int main() {
+int main(int args, char** argv) {
   const size_t THREADS = 0;
   TestSettings testSettings;
   LogSettings logSettings;
@@ -28,8 +28,11 @@ int main() {
   testSettings.server_num_issue_query_threads = 0;
   testSettings.generic_num_issue_query = THREADS;
 
-  ushort port = 8086;
-  std::string address = "localhost";
+  if(args < 3){
+    std::cerr << argv[0] << " <SUT address> <SUT port>\n";
+  }
+  ushort port = atoi(argv[2]);
+  std::string address = argv[1];
   std::string labels_path = "coco/labels.txt";
   std::string images_path = "coco/images";
   std::string uspp_path = "uspp_processed";
