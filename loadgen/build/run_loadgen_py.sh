@@ -4,7 +4,8 @@ set -- ${NONTC[@]}
 sut=$1;
 name=$2;
 output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet
-shift 2;
+selector=$3;
+shift 3;
 python3 python/py_loadgen/main.py \
  --backend onnxruntime \
  --model-name ssd-mobilenet \
@@ -18,5 +19,5 @@ python3 python/py_loadgen/main.py \
  $@ && \
 \
 cat "$output"/results.json | sed "s;\(\".*\)\(\.\)\(.*\"\);\1_\3;" > results.json && \
-curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_"$name".json
-
+# curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_"$name".json
+python3 store_results.py "$name" "$selector" "$output"
