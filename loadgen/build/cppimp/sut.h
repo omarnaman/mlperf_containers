@@ -14,7 +14,7 @@ using namespace mlperf;
 class SUT : public SystemUnderTest {
  public:
   const std::string& Name() const override;
-  void IssueQuery(const std::vector<QuerySample>& samples, size_t thread_idx = 0) override;
+  void IssueQuery(const std::vector<QuerySample>& samples) override;
   void FlushQueries() override;
   void ReportLatencyResults(
       const std::vector<QuerySampleLatency>& latencies_ns) override;

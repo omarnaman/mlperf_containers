@@ -48,8 +48,7 @@ class SystemUnderTest {
   /// cases properly.
   /// Note: The data for neighboring samples may or may not be contiguous
   /// depending on the scenario.
-  virtual void IssueQuery(const std::vector<QuerySample>& samples,
-                          size_t thread_idx = 0) = 0;
+  virtual void IssueQuery(const std::vector<QuerySample>& samples) = 0;
 
   /// \brief Called immediately after the last call to IssueQuery
   /// in a series is made.
