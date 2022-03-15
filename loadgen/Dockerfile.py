@@ -40,14 +40,13 @@ RUN git clone https://github.com/omarnaman/ccli_colors && \
 RUN git clone https://github.com/omarnaman/cli_colors && \
     pip3 install ./cli_colors && \
     rm -rf cli_colors
-    
-COPY loadgen/build /workspace/loadgen/build/
-COPY common/setup_tc.sh /workspace/loadgen/build/
-COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
+
+
 
 
 
 # generate dataset
+COPY loadgen/build/python/tools /workspace/loadgen/build/python/tools
 RUN cd /workspace/loadgen/build/python/tools && \
     if [ -d ../coco ]; then echo "COCO FOUND"; else \
         [ -f val2017.zip ] || wget -q http://images.cocodataset.org/zips/val2017.zip && \
@@ -58,12 +57,16 @@ RUN cd /workspace/loadgen/build/python/tools && \
     rm val2017.zip annotations_trainval2017.zip && \
     rm -rf val2017 annotations; \
     fi
-
-
+    
 # install loadgen
+COPY loadgen/build/c_loadgen /workspace/loadgen/build/c_loadgen
 RUN cd /workspace/loadgen/build/c_loadgen && \
     FLAGS="-std=c++14" python3 setup.py install
     # rm -rf c_loadgen
+
+COPY loadgen/build/python/py_loadgen /workspace/loadgen/build/python/py_loadgen
+COPY common/setup_tc.sh /workspace/loadgen/build/
+COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build
