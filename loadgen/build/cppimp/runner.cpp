@@ -6,10 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "../c_loadgen/issue_query_controller.h"
 #include "../c_loadgen/loadgen.h"
-#include "../c_loadgen/query_sample.h"
-#include "../c_loadgen/query_sample_library.h"
 #include "./dataset.h"
 #include "lib/basic_client.h"
 
