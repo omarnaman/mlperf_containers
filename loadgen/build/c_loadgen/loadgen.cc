@@ -229,7 +229,7 @@ std::vector<QueryMetadata> GenerateQueries(
 
   constexpr bool kIsMultiStream = scenario == TestScenario::MultiStream ||
                                   scenario == TestScenario::MultiStreamFree;
-  const size_t sample_stride = kIsMultiStream ? samples_per_query : 1;
+  const size_t sample_stride = samples_per_query;
 
   auto sample_distribution = SampleDistribution<mode>(
       loaded_sample_set.sample_distribution_end, sample_stride, &sample_rng);
