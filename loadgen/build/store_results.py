@@ -47,13 +47,11 @@ def parse_args():
                         default="http://localhost:8086",
                         help="The address:port of the storage service")
     args = parser.parse_args()
-    print(args)
     return args
 
 def main():
     args = parse_args()
     qps, latencies = process_summary(args.output)
-    print(qps, latencies)
     upload_qps(args.eid, args.selector, qps, args.address)
     upload_latencies(args.eid, args.selector, latencies, args.address)
 
