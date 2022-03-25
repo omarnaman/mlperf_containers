@@ -9,7 +9,6 @@
 #include <thread>
 #include <vector>
 
-#include "../c_loadgen/query_sample.h"
 #include "./dataset.h"
 #include "../c_loadgen/runner.h"
 #include "lib/basic_client.h"
