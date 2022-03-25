@@ -49,7 +49,7 @@ limitations under the License.
 #include <vector>
 
 #include "query_sample.h"
-
+#include "utils.h"
 namespace mlperf {
 
 /// \brief Wait-free logging utilities that defer stringification
@@ -216,7 +216,7 @@ class ChromeTracer {
 class AsyncLog {
  public:
   void SetLogFiles(std::ostream* summary, std::ostream* detail,
-                   std::ostream* accuracy, bool copy_detail_to_stdout,
+                   std::ostream* accuracy, std::ostream* summary_json, bool copy_detail_to_stdout,
                    bool copy_summary_to_stdout,
                    PerfClock::time_point log_origin);
   void StartNewTrace(std::ostream* trace_out, PerfClock::time_point origin);
@@ -230,6 +230,21 @@ class AsyncLog {
 
   template <typename... Args>
   void LogSummary(const std::string& message, const Args... args);
+  void LogSummaryJson(double qps, const std::vector<QuerySampleLatency>& latencies) {
+    std::unique_lock<std::mutex> lock(log_mutex_);
+    *summary_json_out_ << "{\n";
+    *summary_json_out_ << "\t \"qps\": " << qps << ",\n";
+    *summary_json_out_ << "\t \"latencies\": [\n";
+    for (size_t i = 0; i < latencies.size(); i++) {
+      *summary_json_out_ << "\t\t "<< QuerySampleLatencyToSeconds(latencies[i]);
+      if (i < latencies.size() - 1) {
+        *summary_json_out_ << ",";
+      }
+        *summary_json_out_ << "\n";
+    }
+    *summary_json_out_ << "\t ]\n";
+    *summary_json_out_ << "}\n";
+  }
 
   void SetLogDetailTime(PerfClock::time_point time) { log_detail_time_ = time; }
 
@@ -350,6 +365,8 @@ class AsyncLog {
   std::ostream* summary_out_ = &std::cerr;
   std::ostream* detail_out_ = &std::cerr;
   std::ostream* accuracy_out_ = &std::cerr;
+  std::ostream* summary_json_out_ = &std::cerr;
+
   // TODO: Instead of these bools, use a class that forwards to two streams.
   bool copy_detail_to_stdout_ = false;
   bool copy_summary_to_stdout_ = false;
@@ -394,7 +411,7 @@ class Logger {
   void StopIOThread();
 
   void StartLogging(std::ostream* summary, std::ostream* detail,
-                    std::ostream* accuracy, bool copy_detail_to_stdout,
+                    std::ostream* accuracy, std::ostream* summary_json, bool copy_detail_to_stdout,
                     bool copy_summary_to_stdout);
   void StopLogging();
 
@@ -527,6 +544,11 @@ class AsyncSummary {
     async_log_.LogSummary(std::forward<Args>(args)...);
     return async_log_;
   }
+
+  void LogQpsAndLatencies(double qps, const std::vector<QuerySampleLatency>& latencies) {
+    async_log_.LogSummaryJson(qps, latencies);
+  }
+  
 
  private:
   AsyncLog& async_log_;

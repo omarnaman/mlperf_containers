@@ -213,7 +213,7 @@ void AsyncLog::SetCurrentPidTid(uint64_t pid, uint64_t tid) {
 }
 
 void AsyncLog::SetLogFiles(std::ostream* summary, std::ostream* detail,
-                           std::ostream* accuracy, bool copy_detail_to_stdout,
+                           std::ostream* accuracy, std::ostream* summary_json, bool copy_detail_to_stdout,
                            bool copy_summary_to_stdout,
                            PerfClock::time_point log_origin) {
   std::unique_lock<std::mutex> lock(log_mutex_);
@@ -256,6 +256,7 @@ void AsyncLog::SetLogFiles(std::ostream* summary, std::ostream* detail,
   summary_out_ = summary;
   detail_out_ = detail;
   accuracy_out_ = accuracy;
+  summary_json_out_ = summary_json;
   if (accuracy_out_ != &std::cerr) {
     WriteAccuracyHeaderLocked();
   }
@@ -671,9 +672,9 @@ void Logger::StopIOThread() {
 }
 
 void Logger::StartLogging(std::ostream* summary, std::ostream* detail,
-                          std::ostream* accuracy, bool copy_detail_to_stdout,
+                          std::ostream* accuracy, std::ostream* summary_json, bool copy_detail_to_stdout,
                           bool copy_summary_to_stdout) {
-  async_logger_.SetLogFiles(summary, detail, accuracy, copy_detail_to_stdout,
+  async_logger_.SetLogFiles(summary, detail, accuracy, summary_json, copy_detail_to_stdout,
                             copy_summary_to_stdout, PerfClock::now());
 }
 
@@ -692,7 +693,7 @@ void Logger::StopLogging() {
   std::promise<void> io_thread_flushed_this_thread;
   Log([&](AsyncLog&) { io_thread_flushed_this_thread.set_value(); });
   io_thread_flushed_this_thread.get_future().wait();
-  async_logger_.SetLogFiles(&std::cerr, &std::cerr, &std::cerr, false, false,
+  async_logger_.SetLogFiles(&std::cerr, &std::cerr, &std::cerr, &std::cerr, false, false,
                             PerfClock::now());
 }
 

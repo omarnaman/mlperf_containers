@@ -797,6 +797,7 @@ void PerformanceSummary::LogSummary(AsyncSummary& summary) {
     summary("QPS w/ loadgen overhead         : " + DoubleToString(qps_w_lg));
     summary("QPS w/o loadgen overhead        : " + DoubleToString(qps_wo_lg));
     summary("");
+    summary.LogQpsAndLatencies(qps_w_lg, pr.sample_latencies);
   } else if (settings.scenario == TestScenario::Server) {
     double qps_as_completed =
         (sample_count - 1) / pr.final_query_all_samples_done_time;
@@ -1049,6 +1050,8 @@ struct LogOutputs {
     detail_out.open(prefix + "detail" + suffix + ".txt");
     accuracy_out.open(prefix + "accuracy" + suffix + ".json");
     trace_out.open(prefix + "trace" + suffix + ".json");
+    summary_out_json.open(prefix + "summary" + suffix + ".json");
+
   }
 
   bool CheckOutputs() {
@@ -1076,6 +1079,7 @@ struct LogOutputs {
   std::ofstream detail_out;
   std::ofstream accuracy_out;
   std::ofstream trace_out;
+  std::ofstream summary_out_json;
 };
 
 /// \brief Find boundaries of performance settings by widening bounds
@@ -1527,6 +1531,7 @@ void StartTest(SystemUnderTest* sut, QuerySampleLibrary* qsl,
 
   GlobalLogger().StartLogging(&log_outputs.summary_out, &log_outputs.detail_out,
                               &log_outputs.accuracy_out,
+                              &log_outputs.summary_out_json,
                               log_settings.log_output.copy_detail_to_stdout,
                               log_settings.log_output.copy_summary_to_stdout);
 
