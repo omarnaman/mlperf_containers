@@ -85,6 +85,7 @@ RUN cd /workspace/loadgen/build/cppimp && \
     make -C build -j5
 
 COPY common/setup_tc.sh /workspace/loadgen/build/
+COPY loadgen/build/store_results.py /workspace/loadgen/build/
 COPY loadgen/build/run_loadgen_cpp.sh /workspace/loadgen/build/
 
 # Start loadgen

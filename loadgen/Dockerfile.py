@@ -66,7 +66,11 @@ RUN cd /workspace/loadgen/build/c_loadgen && \
 
 COPY loadgen/build/python/py_loadgen /workspace/loadgen/build/python/py_loadgen
 COPY common/setup_tc.sh /workspace/loadgen/build/
-COPY common/grpc_proto/*.py /workspace/loadgen/build/python/py_loadgen/
+COPY loadgen/build/run_loadgen_py.sh /workspace/loadgen/build/
+COPY loadgen/build/mlperf.conf /workspace/loadgen/build/
+COPY loadgen/build/user.conf /workspace/loadgen/build/
+COPY loadgen/build/store_results.py /workspace/loadgen/build/
+COPY common/grpc_proto/python/*.py /workspace/loadgen/build/python/py_loadgen/
 
 # Start loadgen
 WORKDIR /workspace/loadgen/build

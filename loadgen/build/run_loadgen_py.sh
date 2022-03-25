@@ -1,11 +1,15 @@
 source ./setup_tc.sh $@
 
 set -- ${NONTC[@]}
-sut=$1;
-name=$2;
+# SUT_address SUT_port Storage_address Storage_port Experiment_name Selector
+sut_address=$1;
+sut_port=$2;
+storage_address=$3;
+storage_port=$4;
+eid=$5;
+selector=$6;
+shift 6;
 output=`pwd`/output/onnxruntime-cpu/ssd-mobilenet
-selector=$3;
-shift 3;
 python3 python/py_loadgen/main.py \
  --backend onnxruntime \
  --model-name ssd-mobilenet \
@@ -14,10 +18,8 @@ python3 python/py_loadgen/main.py \
  --dataset-path `pwd`/python/coco_300 \
  --mlperf_conf mlperf.conf \
  --max-batchsize 8 \
- --address $sut \
+ --address "$sut_address:$sut_port" \
  --threads 8 \
  $@ && \
 \
-cat "$output"/results.json | sed "s;\(\".*\)\(\.\)\(.*\"\);\1_\3;" > results.json && \
-# curl -X PUT -d "@results.json" https://mlperf-c8f1a-default-rtdb.firebaseio.com/`date +%s`_"$name".json
-python3 store_results.py "$name" "$selector" "$output"
+python3 store_results.py "$eid" "$selector" "$output" "http://$storage_address:$storage_port"
