@@ -183,18 +183,10 @@ class RemoteRunnerBase(RunnerBase):
         self.stub = basic_pb2_grpc.BasicServiceStub(self.channel)
 
     def predict(self, qitem: Item):
-        s = time.time()
-        item_pickle = pickle.dumps(qitem.img)
-        p1 = time.time()
-        request = basic_pb2.RequestItem(items=item_pickle)
+        request = basic_pb2.RequestItem(items=qitem.img[0].tobytes(), id=qitem.content_id[0])
         try:
             response: basic_pb2.ItemResult = self.stub.InferenceItem(request, timeout = self.timeout) 
-            p2 = time.time()
-            result, time_taken = pickle.loads(response.results)
-            e = time.time()
-            self.time_taken.append(time_taken)
-            self.coms.append(p2 - p1 - time_taken)
-            self.pickling.append((p1 - s, e - p2))
+            result = [[r] for r in response.results]
             return result
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:

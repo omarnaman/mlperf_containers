@@ -64,8 +64,8 @@ class SystemUnderTest {
   /// recorded by the load generator. Units are nanoseconds.
   virtual void ReportLatencyResults(
       const std::vector<QuerySampleLatency>& latencies_ns) = 0;
+      
   RunnerBase* runner;
-
 };
 
 /// @}

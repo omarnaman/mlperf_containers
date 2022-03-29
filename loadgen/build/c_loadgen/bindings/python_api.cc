@@ -16,12 +16,14 @@ limitations under the License.
 #ifndef PYTHON_BINDINGS_H
 #define PYTHON_BINDINGS_H
 
-#include <functional>
 #include <stdlib.h>
+
+#include <functional>
 
 #include "../loadgen.h"
 #include "../query_sample.h"
 #include "../query_sample_library.h"
+#include "../runner.h"
 #include "../system_under_test.h"
 #include "../test_settings.h"
 #include "pybind11/functional.h"
@@ -39,6 +41,26 @@ using FastIssueQueriesCallback =
 using FlushQueriesCallback = std::function<void()>;
 using ReportLatencyResultsCallback = std::function<void(std::vector<int64_t>)>;
 
+class PythonRunner : public RunnerBase {
+ public:
+  PythonRunner(mlperf::Dataset* dataset, IssueQueryCallback issue_cb_)
+      : RunnerBase(dataset), issue_cb(issue_cb_) {}
+  virtual void runQuery(
+      const std::vector<mlperf::QuerySample>& samples) override {
+    pybind11::gil_scoped_acquire gil_acquirer;
+    issue_cb(samples);
+  }
+  virtual mlperf::QuerySampleResponse predict(const Data* item) override {
+    return QuerySampleResponse{
+        .id = item->id, .data = (uintptr_t)item->data, .size = item->size};
+  }
+  virtual RunnerBase* clone() override {
+    return this;
+  };
+
+ protected:
+  IssueQueryCallback issue_cb;
+};
 // Forwards SystemUnderTest calls to relevant callbacks.
 class SystemUnderTestTrampoline : public SystemUnderTest {
  public:
@@ -49,7 +71,9 @@ class SystemUnderTestTrampoline : public SystemUnderTest {
       : name_(std::move(name)),
         issue_cb_(issue_cb),
         flush_queries_cb_(flush_queries_cb),
-        report_latency_results_cb_(report_latency_results_cb) {}
+        report_latency_results_cb_(report_latency_results_cb) {
+    this->runner = new PythonRunner(NULL, issue_cb);
+  }
   ~SystemUnderTestTrampoline() override = default;
 
   const std::string& Name() const override { return name_; }
@@ -96,8 +120,8 @@ class FastSystemUnderTestTrampoline : public SystemUnderTestTrampoline {
     fast_issue_cb_(responseIds, querySampleIndices);
   }
 
-  private:
-   FastIssueQueriesCallback fast_issue_cb_;
+ private:
+  FastIssueQueriesCallback fast_issue_cb_;
 };
 
 using LoadSamplesToRamCallback =
@@ -175,7 +199,6 @@ void DestroyFastSUT(uintptr_t sut) {
       reinterpret_cast<FastSystemUnderTestTrampoline*>(sut);
   delete sut_cast;
 }
-
 
 uintptr_t ConstructQSL(
     size_t total_sample_count, size_t performance_sample_count,

@@ -37,6 +37,7 @@ public_headers = [
     "query_sample.h",
     "query_sample_library.h",
     "system_under_test.h",
+    "runner.h",
     "test_settings.h",
 ]
 
@@ -52,6 +53,7 @@ lib_sources = [
     "issue_query_controller.cc",
     "loadgen.cc",
     "logging.cc",
+    "runner.cpp",
     "test_settings_internal.cc",
     "utils.cc",
     "version.cc",
