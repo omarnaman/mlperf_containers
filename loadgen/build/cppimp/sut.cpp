@@ -18,19 +18,8 @@ using namespace mlperf;
 const std::string& SUT::Name() const { return name; }
 void SUT::IssueQuery(const std::vector<QuerySample>& samples) {
   runner->runQuery(samples);
-  // // std::cout << "Sent a query\n";
-  // std::vector<QuerySampleResponse> responses;
-  // for (size_t i = 0; i < samples.size(); i++) {
-  //   QuerySampleResponse response;
-  //   response.id = samples[i].id;
-  //   response.data = NULL;
-  //   response.size = 0;
-  //   usleep(10);
-  //   responses.push_back(response);
-  // }
-
-  // QuerySamplesComplete(responses.data(), responses.size());
 }
+
 void SUT::FlushQueries() { std::cout << "Flushed queries\n"; }
 void SUT::ReportLatencyResults(
     const std::vector<QuerySampleLatency>& latencies_ns) {

@@ -191,7 +191,6 @@ std::vector<std::string> PreprocessedDataset::listDir(
   DIR* dir_fd = opendir(dir_path.c_str());
   std::vector<std::string> filelist;
   if (!dir_fd) {
-    std::cerr << "Im dead lol\n";
     return filelist;
   }
   dirent* file;
