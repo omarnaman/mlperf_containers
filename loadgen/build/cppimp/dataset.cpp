@@ -14,7 +14,9 @@ using namespace mlperf;
 
 /* Synthetic Dataset Implementation*/
 #pragma region SyntheticDataset
-SyntheticDataset::SyntheticDataset(){};
+SyntheticDataset::SyntheticDataset(size_t number_of_samples) {
+  this->number_of_samples = number_of_samples;
+};
 SyntheticDataset::~SyntheticDataset(){};
 void SyntheticDataset::loadDataset() { return; }
 
@@ -25,12 +27,19 @@ Data* SyntheticDataset::getSample(const int& index) {
   res->label = 0;
   return res;
 }
+
+size_t SyntheticDataset::getNumberOfSamples() {
+  return number_of_samples;
+};
+
 #pragma endregion SyntheticDataset
 
 /* String Dataset Implementation*/
 #pragma region StringDataset
 
-StringDataset::StringDataset(){};
+StringDataset::StringDataset(size_t number_of_samples) {
+  this->number_of_samples = number_of_samples;
+};
 StringDataset::~StringDataset(){};
 void StringDataset::loadDataset() { return; }
 
@@ -42,6 +51,10 @@ Data* StringDataset::getSample(const int& index) {
   res->label = 0;
   return res;
 }
+
+size_t StringDataset::getNumberOfSamples() {
+  return number_of_samples;
+};
 #pragma endregion StringDataset
 
 
@@ -73,6 +86,10 @@ std::vector<std::string> CocoDataset::listDir(const std::string& dirPath) {
 
   return filelist;
 }
+
+size_t CocoDataset::getNumberOfSamples() {
+  return dataPoints->size();
+};
 
 void CocoDataset::loadDataset() {
   char tmp[1000];
@@ -186,6 +203,10 @@ std::vector<std::string> PreprocessedDataset::listDir(
 
   return filelist;
 }
+
+size_t PreprocessedDataset::getNumberOfSamples() {
+  return dataPoints->size();
+};
 
 void PreprocessedDataset::loadDataset() {
   char tmp[1000];

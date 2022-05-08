@@ -22,6 +22,7 @@ class Dataset {
   virtual void loadSamples(const std::vector<size_t>& samples){};
   virtual Data* getSample(const int& index) = 0;
   virtual void postProcess(const char* data, size_t size = 0){};
+  virtual size_t getNumberOfSamples() = 0;
 };
 
 }  // namespace mlperf

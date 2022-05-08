@@ -9,23 +9,29 @@
 
 class SyntheticDataset : public mlperf::Dataset {
  private:
+  size_t number_of_samples;
  public:
-  SyntheticDataset();
+  SyntheticDataset(size_t number_of_samples);
   ~SyntheticDataset();
 
   void loadDataset() override;
 
   mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
+
 };
 
 class StringDataset : public mlperf::Dataset {
  private:
+  size_t number_of_samples;
+
  public:
-  StringDataset();
+  StringDataset(size_t number_of_samples);
   ~StringDataset();
 
   void loadDataset() override;
   mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
 };
 
 class CocoDataset : public mlperf::Dataset {
@@ -43,6 +49,7 @@ class CocoDataset : public mlperf::Dataset {
   void loadSamples(const std::vector<size_t>& samples) override;
   mlperf::Data* getSample(const int& index) override;
   void postProcess(const char* data, size_t size) override;
+  size_t getNumberOfSamples() override;
 };
 
 class PreprocessedDataset : public mlperf::Dataset {
@@ -58,6 +65,7 @@ class PreprocessedDataset : public mlperf::Dataset {
   void loadDataset() override;
   void loadSamples(const std::vector<size_t>& samples) override;
   mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
 };
 
 #endif

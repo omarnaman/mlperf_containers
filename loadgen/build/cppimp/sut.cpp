@@ -44,11 +44,9 @@ SUT::SUT(RunnerBase* runner, size_t n_threads) {
   }
 }
 SUT::~SUT() {
-  for (auto &&thread : threads)
-  {
+  for (auto&& thread : threads) {
     thread.join();
   }
-  
 }
 
 // QSL implementation
@@ -63,9 +61,9 @@ void QSL::LoadSamplesToRam(const std::vector<QuerySampleIndex>& samples) {
 }
 void QSL::UnloadSamplesFromRam(const std::vector<QuerySampleIndex>& samples) {}
 
-QSL::QSL(size_t total_sample_count, size_t performance_sample_count,
+QSL::QSL(size_t performance_sample_count,
          Dataset* dataset) {
-  this->total_sample_count = total_sample_count;
+  this->total_sample_count = dataset->getNumberOfSamples();
   this->performance_sample_count = performance_sample_count;
   this->dataset = dataset;
   name = "qsl_cpp";

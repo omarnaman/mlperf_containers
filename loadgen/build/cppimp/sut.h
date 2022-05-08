@@ -36,7 +36,7 @@ class QSL : public QuerySampleLibrary {
   void UnloadSamplesFromRam(
       const std::vector<QuerySampleIndex>& samples) override;
 
-  QSL(size_t total_sample_count, size_t performance_sample_count, Dataset* dataset);
+  QSL(size_t performance_sample_count, Dataset* dataset);
 
   ~QSL();
 
