@@ -650,6 +650,7 @@ int TestSettings::FromConfig(const std::string &path, const std::string &model,
   lookupkv(model, scenario, "performance_sample_count_override",
            &performance_sample_count_override, nullptr);
   lookupkv(model, scenario, "num_threads", &generic_num_issue_query, nullptr);
+  lookupkv(model, scenario, "samples_per_query", &samples_per_query, nullptr);
 
   // keys that apply to SingleStream
   lookupkv(model, "SingleStream", "target_latency_percentile", nullptr,

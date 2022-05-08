@@ -153,6 +153,8 @@ struct TestSettings {
   /// should be preceeded by registering the same number of threads using
   /// \ref mlperf::RegisterIssueQueryThread() 
   size_t generic_num_issue_query = 0;
+  
+  size_t samples_per_query = 1;
   /**@}*/
 
   // ==================================
