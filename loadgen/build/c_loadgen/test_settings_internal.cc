@@ -467,6 +467,7 @@ void TestSettingsInternal::LogSummary(AsyncSummary &summary) const {
   summary("performance_issue_same : ", performance_issue_same);
   summary("performance_issue_same_index : ", performance_issue_same_index);
   summary("performance_sample_count : ", performance_sample_count);
+  summary("num_threads : ", num_threads);
 }
 
 }  // namespace loadgen
@@ -647,6 +648,7 @@ int TestSettings::FromConfig(const std::string &path, const std::string &model,
            &performance_issue_same_index, nullptr);
   lookupkv(model, scenario, "performance_sample_count_override",
            &performance_sample_count_override, nullptr);
+  lookupkv(model, scenario, "num_threads", &generic_num_issue_query, nullptr);
 
   // keys that apply to SingleStream
   lookupkv(model, "SingleStream", "target_latency_percentile", nullptr,
