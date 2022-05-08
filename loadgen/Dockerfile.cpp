@@ -40,7 +40,7 @@ ENV PATH="${LIB_INSTALL_DIR}/cmake/bin:${PATH}"
 
 RUN cd /var/local && \
     git clone --recurse-submodules -b v1.43.0 https://github.com/grpc/grpc
-RUN echo $(cmake --version)
+
 RUN cd /var/local && \
     cd grpc && mkdir -p cmake/build && \
     cd cmake/build && \
