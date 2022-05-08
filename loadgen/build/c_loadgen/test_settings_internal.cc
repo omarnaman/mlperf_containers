@@ -50,6 +50,7 @@ TestSettingsInternal::TestSettingsInternal(
       performance_sample_count(0),
       num_threads(requested.generic_num_issue_query) {
   // Target QPS, target latency, and max_async_queries.
+  samples_per_query = requested.samples_per_query;
   switch (requested.scenario) {
     case TestScenario::SingleStream:
       target_qps = static_cast<double>(std::nano::den) /
