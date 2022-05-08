@@ -477,6 +477,8 @@ void TestSettingsInternal::LogSummary(AsyncSummary &summary) const {
 int TestSettings::FromConfig(const std::string &path, const std::string &model,
                              const std::string &scenario) {
   // TODO: move this method to a new file test_settings.cc
+
+  enum class Target {KEY, EQUALS, VALUE, ELSE};
   std::map<std::string, std::string> kv;
 
   // lookup key/value pairs from config
@@ -538,21 +540,23 @@ int TestSettings::FromConfig(const std::string &path, const std::string &model,
     line_nr++;
     std::istringstream iss(line);
     std::string s, k;
-    int looking_for = 0;  // 0=key, 1=equal, 2=value
+    Target looking_for = Target::KEY;  // 0=key, 1=equal, 2=value
     while (iss >> s) {
-      if (s == "#" && looking_for != 2) {
+      if (s == "#" && looking_for != Target::VALUE) {
         // done with this line
         break;
       }
-      if (looking_for == 2) {
+      if (looking_for == Target::VALUE) {
         // got key and value
         const char *start = s.c_str();
         char *stop;
+        // Try to convert to Unsigned Long
         (void)strtoul(start, &stop, 0);
         if (start + s.size() == stop) {
           kv[k] = s;
           continue;
         }
+        // If not Unsigned Long, try to convert to double
         (void)strtod(start, &stop);
         if (start + s.size() == stop) {
           kv[k] = s;
@@ -570,7 +574,7 @@ int TestSettings::FromConfig(const std::string &path, const std::string &model,
         });
         break;
       }
-      if (looking_for == 1 && s != "=") {
+      if (looking_for == Target::EQUALS && s != "=") {
         errors++;
         LogDetail([l = line_nr](AsyncDetail & detail) {
 #if USE_NEW_LOGGING_FORMAT
@@ -583,8 +587,8 @@ int TestSettings::FromConfig(const std::string &path, const std::string &model,
         });
         break;
       }
-      if (looking_for == 0) k = s;
-      looking_for++;
+      if (looking_for == Target::KEY) k = s;
+      looking_for = static_cast<Target>(static_cast<int>(looking_for) + 1);
     }
   }
   if (errors != 0) return -EINVAL;
