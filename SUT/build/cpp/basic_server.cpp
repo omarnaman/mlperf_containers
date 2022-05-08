@@ -7,7 +7,7 @@
 #include <mutex>
 #include <string>
 
-#include "basic.grpc.pb.h"
+#include "lib/basic.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
