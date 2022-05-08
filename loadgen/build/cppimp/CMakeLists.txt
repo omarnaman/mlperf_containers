@@ -40,7 +40,6 @@ set(HEADER_FILES
     ${mlperf_runner_hdr} ${mlperf_sut_src} ${mlperf_sut_hdr})
 
 # Generated sources
-# TODO: use lib from root directory instead of symlinks
 set(basic_proto_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.cc")
 set(basic_proto_hdrs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.pb.h")
 set(basic_grpc_srcs "${CMAKE_CURRENT_SOURCE_DIR}/lib/basic.grpc.pb.cc")
@@ -53,12 +52,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 if($ENV{DOCKER_CMAKE})
   message(STATUS "INCLUDING INSIDE DOCKER")
   include_directories("$ENV{LIB_INSTALL_DIR}/include")
-  else()
+else()
   message(STATUS "INCLUDING OUTSIDE DOCKER")
   include_directories("$ENV{HOME}/.local/include/")
-  endif()
+endif()
 
-message("DIRECTORIES INCLUDED=${INCLUDE_DIRECTORIES}")
 
 # Find original mlperf library
 find_library(MLPERF_LIBRARY mlperf_loadgen HINTS "${loadgen_component}/build")
@@ -94,8 +92,3 @@ target_link_libraries(
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
-add_executable(grpc_server lib/basic_server.cpp)
-target_link_libraries(
-  grpc_server basic_grpc_proto
-  # ${MLPERF_LIBRARY}
-  ${_REFLECTION} ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF})
