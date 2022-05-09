@@ -3,16 +3,17 @@
 INTERFACE=`netstat -i | grep eth | cut -d" "  -f1`;
 DELAY=""
 BANDWIDTH=""
+JITTER=""
 RANDOM_LOSS_PERCENT=""
 REORDER_PERCENT=""
 TC=0
 
 function setupTC () {
     if [ "$DELAY" != "" ]; then
-        tc qdisc add dev $INTERFACE root netem delay $DELAY
+        tc qdisc add dev $INTERFACE root netem delay $DELAY $JITTER
     fi
     if [ "$BANDWIDTH" != "" ]; then
-        tc qdisc add dev $INTERFACE root netem rate $BANDWIDTH
+        tc qdisc add dev $INTERFACE root netem rate $BANDWIDTH 
     fi
     if [ "$RANDOM_LOSS_PERCENT" != "" ]; then
         tc qdisc add dev $INTERFACE root netem loss random $RANDOM_LOSS_PERCENT
@@ -33,6 +34,10 @@ function getTCArgs () {
             ;;
             -d|--tc_delay)
             DELAY="$2"
+            shift 2;
+            ;;
+            --tc_jitter)
+            JITTER="$2"
             shift 2;
             ;;
             -b|--tc_bandwidth)
