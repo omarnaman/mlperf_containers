@@ -17,11 +17,10 @@
 class RunnerRemote : public mlperf::RunnerBase {
  protected:
   std::string remote_address;
-  ushort remote_port;
   BasicServiceClient* client;
 
  public:
-  RunnerRemote(const std::string& address, const ushort& port,
+  RunnerRemote(const std::string& address,
                mlperf::Dataset* dataset);
   RunnerRemote(const RunnerRemote& src);
   ~RunnerRemote();
@@ -35,7 +34,6 @@ class RunnerRemote : public mlperf::RunnerBase {
 class RemoteStreamer : public mlperf::RunnerBase {
  private:
   std::string remote_address;
-  ushort remote_port;
   std::thread* sender;
   std::thread* receiver;
   std::mutex mt;
@@ -43,7 +41,7 @@ class RemoteStreamer : public mlperf::RunnerBase {
   BasicServiceClientStreamer* clientStreamer;
 
  public:
-  RemoteStreamer(const std::string& address, const ushort& port,
+  RemoteStreamer(const std::string& address,
                  mlperf::Dataset* dataset);
   RemoteStreamer(const RemoteStreamer& src);
   ~RemoteStreamer();

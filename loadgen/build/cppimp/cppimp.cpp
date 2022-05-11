@@ -36,20 +36,13 @@ int main(int args, char** argv) {
   LogSettings logSettings;
 
   if (args < 3) {
-    std::cerr << argv[0] << "<Scenario> <SUT address> <SUT port>\n";
+    std::cerr << argv[0] << "<Scenario> <SUT address>\n";
   }
   std::string model = "Coco";  // TODO: read from args
   std::string string_scenario = argv[1];
   TestScenario testScenario = GetScenario(string_scenario);
 
   std::string address = argv[2];
-  ushort port;
-  std::stringstream ss(argv[3]);
-  ss >> port;
-  ss.clear();
-  ss << argv[4];
-  size_t threads;
-  ss >> threads;
   std::string conf_path = "mlperf.conf";
   testSettings.FromConfig(conf_path, string_scenario, model);
   testSettings.scenario = testScenario;
@@ -59,7 +52,7 @@ int main(int args, char** argv) {
   std::string uspp_path = "uspp_processed";
 
   Dataset* dataset = new CocoDataset(labels_path, images_path);
-  RunnerBase* runner = new RunnerRemote(address, port, dataset);
+  RunnerBase* runner = new RunnerRemote(address, dataset);
   SystemUnderTest* sut = new SUT(runner, THREADS);
   QuerySampleLibrary* qsl = new QSL(128, dataset);
 

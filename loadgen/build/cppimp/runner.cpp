@@ -23,20 +23,17 @@ QuerySampleResponse RunnerRemote::predict(const Data* item) {
 }
 
 std::string RunnerRemote::targetString() {
-  std::stringstream ss;
-  ss << remote_address << ":" << remote_port;
-  return ss.str();
+  return remote_address;
 }
 
-RunnerRemote::RunnerRemote(const std::string& address, const ushort& port,
+RunnerRemote::RunnerRemote(const std::string& address,
                            Dataset* dataset)
-    : RunnerBase(dataset), remote_address(address), remote_port(port) {
+    : RunnerBase(dataset), remote_address(address) {
   puts("RunnerRemote Constructor");
 }
 
 RunnerRemote::RunnerRemote(const RunnerRemote& src) : RunnerBase(src) {
   this->remote_address = src.remote_address;
-  this->remote_port = src.remote_port;
 }
 
 RunnerRemote::~RunnerRemote() { puts("RunnerRemote Constructor"); }
@@ -53,16 +50,15 @@ RunnerBase* RunnerRemote::clone() {
 }
 
 /*********************************************************************/
-RemoteStreamer::RemoteStreamer(const std::string& address, const ushort& port,
+RemoteStreamer::RemoteStreamer(const std::string& address,
                                Dataset* dataset)
-    : RunnerBase(dataset), remote_address(address), remote_port(port) {
+    : RunnerBase(dataset), remote_address(address) {
   puts("RemoteStreamer Constructor");
   // sender = new std::thread(streamData);
 }
 
 RemoteStreamer::RemoteStreamer(const RemoteStreamer& src) : RunnerBase(src) {
   this->remote_address = src.remote_address;
-  this->remote_port = src.remote_port;
 }
 
 QuerySampleResponse RemoteStreamer::predict(const Data* item) {
@@ -72,9 +68,7 @@ QuerySampleResponse RemoteStreamer::predict(const Data* item) {
 }
 
 std::string RemoteStreamer::targetString() {
-  std::stringstream ss;
-  ss << remote_address << ":" << remote_port;
-  return ss.str();
+  return remote_address;
 }
 
 void RemoteStreamer::runQuery(const std::vector<QuerySample>& samples) {
