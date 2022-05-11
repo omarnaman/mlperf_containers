@@ -12,6 +12,7 @@ eid=$7;
 selector=$8;
 config_id=$9;
 dataset_id=${10};
+scenario=${11};
 shift 10;
 output=`pwd`/cppimp/build
 
@@ -20,5 +21,6 @@ wget "http://$file_storage_address:$file_storage_port/$config_id" --output-docum
 wget "http://$file_storage_address:$file_storage_port/$dataset_id$" --output-document=cppimp/build/dataset.tar.gz && \
 tar -xzf dataset.tar.gz cppimp/build/
 
+cd cppimp/build && ./loadgen $scenario $sut_address $sut_port && \
 \
 cd ../../ && python3 store_results.py "$eid" "$selector" "$output" "http://$storage_address:$storage_port"
