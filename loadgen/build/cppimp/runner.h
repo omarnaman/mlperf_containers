@@ -12,7 +12,6 @@
 #include "./dataset.h"
 #include "../c_loadgen/runner.h"
 #include "lib/basic_client.h"
-#include "lib/thread_queue.h"
 
 class RunnerRemote : public mlperf::RunnerBase {
  protected:
