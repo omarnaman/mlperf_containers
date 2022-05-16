@@ -1,3 +1,9 @@
 [submodule "SUT/build/python/USPP"]
 	path = SUT/build/python/USPP
 	url = git@github.com:omarnaman/USPP.git
+[submodule "mlperf_react"]
+	path = mlperf_react
+	url = git@github.com:omarnaman/mlperf_react.git
+[submodule "cifss"]
+	path = cifss
+	url = git@github.com:omarnaman/cifss.git
