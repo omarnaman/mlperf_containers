@@ -437,10 +437,17 @@ PerformanceResult IssueQueries(SystemUnderTest* sut,
   // Wait for tail queries to complete and collect all the latencies.
   // We have to keep the synchronization primitives alive until the SUT
   // is done with them.
-  auto& final_query = queries[queries_issued - 1];
   std::vector<QuerySampleLatency> sample_latencies(
       GlobalLogger().GetLatenciesBlocking(expected_latencies));
-
+  PerfClock::time_point last = queries[0].issued_start_time;
+  size_t last_index = 0;
+  for (int i = 0; i < queries_issued; i++) {
+    if(queries[i].issued_start_time > last) {
+      last_index = i;
+      last = queries[i].issued_start_time;
+    }
+  }
+  auto& final_query = queries[last_index]; 
   // Log contention counters after every test as a sanity check.
   GlobalLogger().LogContentionAndAllocations();
 
