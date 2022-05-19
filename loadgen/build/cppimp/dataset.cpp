@@ -167,12 +167,6 @@ void CocoDataset::postProcess(const char* data, size_t size) {
     bounding[i].assign(data_float, data_float + 4);
     data_float += 4;
   }
-  std::cout << "Detected " << noi << " objects\n";
-  std::cout << "confidence " << confidence[0] << "\n";
-  std::cout << "label " << label[0] << "\n";
-  if (noi) {
-    std::cout << "bounding x " << bounding[0][0] << "\n";
-  }
 }
 #pragma endregion CocoDataset
 
