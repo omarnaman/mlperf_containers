@@ -4,7 +4,7 @@ set -- ${NONTC[@]}
 # Experiment_name Selector SUT_address Storage_address File_storage_address Config_ID Dataset_ID Scenario
 eid=$1;
 selector=$2;
-sut_address=$3;;
+sut_address=$3;
 storage_address=$4;
 file_storage_address=$5;
 config_id=$6;
@@ -15,8 +15,8 @@ output=`pwd`/cppimp/build
 
 wget "http://$file_storage_address/$config_id" --output-document=cppimp/build/mlperf.conf
 
-wget "http://$file_storage_address/$dataset_id$" --output-document=cppimp/build/dataset.tar.gz && \
-tar -xzf dataset.tar.gz cppimp/build/
+wget "http://$file_storage_address/$dataset_id" --output-document=cppimp/build/dataset.tar.gz && \
+tar -xzf cppimp/build/dataset.tar.gz -C cppimp/build/
 
 cd cppimp/build && ./loadgen $scenario $sut_address && \
 \
