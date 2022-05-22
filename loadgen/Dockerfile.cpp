@@ -76,8 +76,8 @@ RUN cd /workspace/loadgen/build/c_loadgen && \
 
 
 COPY loadgen/build/cppimp /workspace/loadgen/build/cppimp
-COPY common/grpc_proto/cpp/build/*.cc /workspace/loadgen/build/cppimp/lib
-COPY common/grpc_proto/cpp/build/*.h /workspace/loadgen/build/cppimp/lib
+COPY common/grpc_proto/cpp/build/*.cc /workspace/loadgen/build/cppimp/lib/
+COPY common/grpc_proto/cpp/build/*.h /workspace/loadgen/build/cppimp/lib/
 
 # build clients
 RUN cd /workspace/loadgen/build/cppimp && \
