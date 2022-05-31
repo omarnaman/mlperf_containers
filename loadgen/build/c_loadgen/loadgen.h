@@ -18,6 +18,7 @@ limitations under the License.
 #define MLPERF_LOADGEN_LOADGEN_H_
 
 #include <cstddef>
+#include "test_settings.h"
 
 /// \brief Contains the loadgen API.
 namespace mlperf {

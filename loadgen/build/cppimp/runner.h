@@ -61,6 +61,8 @@ class SleepRunner : public mlperf::RunnerBase {
   SleepRunner(mlperf::Dataset* dataset);
   ~SleepRunner();
   mlperf::QuerySampleResponse predict(const mlperf::Data* item) override;
+  virtual mlperf::RunnerBase* clone() override;
+
 };
 
 #endif

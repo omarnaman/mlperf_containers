@@ -23,7 +23,9 @@ RequestData* BasicServiceClient::predict(const char* items, const size_t size,
   ItemResult reply;
 
   ClientContext context;
-
+  auto deadline = std::chrono::system_clock::now() +
+      std::chrono::milliseconds(700);
+  context.set_deadline(deadline);
   Status status = stub_->InferenceItem(&context, request, &reply);
   if (status.ok()) {
     std::string results_items = reply.results();
@@ -33,10 +35,18 @@ RequestData* BasicServiceClient::predict(const char* items, const size_t size,
     memcpy(r->items, results_items.data(), size);
     r->size = size;
     r->id = reply.id();
+    assert(r->id == id);
     return r;
   } else {
     std::cout << status.error_code() << ": " << status.error_message()
               << std::endl;
+    if(status.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED){
+      return new RequestData {
+        .items = nullptr,
+        .size = std::numeric_limits<size_t>::max(),
+        .id = id
+      };
+    }
     return NULL;
   }
 }
@@ -55,7 +65,6 @@ void BasicServiceClientStreamer::sendRequests() {
   size_t size = 0;
   uintptr_t id = 0;
   const RequestData* requestData;
-  puts("sendRequests Started");
   while (true) {
     {
       std::unique_lock<std::mutex> lk(requestMt);
@@ -77,7 +86,6 @@ void BasicServiceClientStreamer::sendRequest(const RequestData* items) {
   requestQueue.push(items);
   // puts("Request Pushed");
   std::stringstream ss;
-  ss << "Request Pushed with ID: " << items->id;
 
   requestPushed.notify_one();
 }
@@ -91,7 +99,6 @@ void BasicServiceClientStreamer::receiveResponse() {
   ItemResult itemResult;
   while (stream->Read(&itemResult)) {
     std::lock_guard<std::mutex> lk(responseMt);
-    puts("Got Response");
     responseQueue.push(
         RequestData{.items = NULL, .size = 0, .id = itemResult.id()});
     responsePushed.notify_one();

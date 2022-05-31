@@ -439,12 +439,12 @@ PerformanceResult IssueQueries(SystemUnderTest* sut,
   // is done with them.
   std::vector<QuerySampleLatency> sample_latencies(
       GlobalLogger().GetLatenciesBlocking(expected_latencies));
-  PerfClock::time_point last = queries[0].issued_start_time;
+  PerfClock::time_point last = queries[0].all_samples_done_time;
   size_t last_index = 0;
   for (int i = 0; i < queries_issued; i++) {
-    if(queries[i].issued_start_time > last) {
+    if(queries[i].all_samples_done_time > last) {
       last_index = i;
-      last = queries[i].issued_start_time;
+      last = queries[i].all_samples_done_time;
     }
   }
   auto& final_query = queries[last_index]; 
@@ -776,6 +776,8 @@ void PerformanceSummary::LogSummary(AsyncSummary& summary) {
   }
   summary("  Min duration satisfied : ", min_duration_met ? "Yes" : "NO");
   summary("  Min queries satisfied : ", min_queries_met ? "Yes" : "NO");
+  double qps_w_lg = (sample_count - 1) / pr.final_query_issued_time;
+  summary.LogQpsAndLatencies(qps_w_lg, pr.sample_latencies);
 
   if (!all_constraints_met) {
     summary("Recommendations:");

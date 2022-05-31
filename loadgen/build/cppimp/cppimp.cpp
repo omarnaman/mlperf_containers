@@ -52,7 +52,7 @@ int main(int args, char** argv) {
   std::string uspp_path = "uspp_processed";
 
   Dataset* dataset = new CocoDataset(labels_path, images_path);
-  RunnerBase* runner = new RunnerRemote(address, dataset);
+  RunnerBase* runner = new RemoteStreamer(address, dataset);
   SystemUnderTest* sut = new SUT(runner, THREADS, testScenario);
   QuerySampleLibrary* qsl = new QSL(256, dataset);
 

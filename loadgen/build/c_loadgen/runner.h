@@ -10,7 +10,6 @@ namespace mlperf {
   class RunnerBase {
   protected:
   public:
-    int queries_sent;
     // Change to shared_pointer
     Dataset* dataset;
     RunnerBase(Dataset* dataset);

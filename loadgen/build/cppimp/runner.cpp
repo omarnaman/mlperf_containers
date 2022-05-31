@@ -82,10 +82,8 @@ void RemoteStreamer::runQuery(const std::vector<QuerySample>& samples) {
 }
 
 void RemoteStreamer::receiveData() {
-  puts("RemoteStreamer: receiveData Started");
   while (true) {
     RequestData response = clientStreamer->getResponse();
-    puts("RemoteStreamer: got response");
     QuerySampleResponse* querySampleResponse =
         new QuerySampleResponse{.id = response.id,
                                         .data = (uintptr_t)response.items,
@@ -113,5 +111,9 @@ QuerySampleResponse SleepRunner::predict(const Data* item) {
   printf("Sleeping for %d us\n", *(int*)item->data);
   usleep(*(int*)item->data);
   return QuerySampleResponse{
-      .id = 0, .data = (uintptr_t)item->data, .size = item->size};
+      .id = item->id, .data = (uintptr_t)item->data, .size = item->size};
+}
+
+mlperf::RunnerBase* SleepRunner::clone(){
+  return (RunnerBase*) new SleepRunner(dataset);
 }
