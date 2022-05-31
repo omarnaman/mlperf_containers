@@ -53,8 +53,8 @@ int main(int args, char** argv) {
 
   Dataset* dataset = new CocoDataset(labels_path, images_path);
   RunnerBase* runner = new RunnerRemote(address, dataset);
-  SystemUnderTest* sut = new SUT(runner, THREADS);
-  QuerySampleLibrary* qsl = new QSL(128, dataset);
+  SystemUnderTest* sut = new SUT(runner, THREADS, testScenario);
+  QuerySampleLibrary* qsl = new QSL(256, dataset);
 
   puts("Starting Test");
   StartTest(sut, qsl, testSettings, logSettings);

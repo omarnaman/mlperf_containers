@@ -7,12 +7,9 @@
 #include "../c_loadgen/loadgen.h"
 #include "../c_loadgen/query_sample_library.h"
 #include "../c_loadgen/system_under_test.h"
+#include "../c_loadgen/test_settings.h"
 #include "runner.h"
 using namespace mlperf;
-
-// void StartIssueThread() {
-//     RegisterIssueQueryThread();
-// }
 
 // SUT implementation
 const std::string& SUT::Name() const { return name; }
@@ -25,11 +22,38 @@ void SUT::ReportLatencyResults(
     const std::vector<QuerySampleLatency>& latencies_ns) {
   std::cout << "Reporting results\n";
 }
-SUT::SUT(RunnerBase* runner, size_t n_threads) {
+
+ SUT::SUT(RunnerBase* runner, size_t n_threads, TestScenario scenario) {
   name = "sut_cpp";
   this->runner = runner;
-  for (size_t i = 0; i < n_threads; i++) {
-    threads.emplace_back(RegisterIssueQueryThread);
+  switch (scenario)
+  {
+  case TestScenario::MultiStream:
+    for (size_t i = 0; i < n_threads; i++) {
+      threads.push_back(std::thread(RegisterIssueQueryThread<TestScenario::MultiStream>));
+    }
+    break;
+  case TestScenario::MultiStreamFree:
+    for (size_t i = 0; i < n_threads; i++) {
+      threads.push_back(std::thread(RegisterIssueQueryThread<TestScenario::MultiStreamFree>));
+    }
+    break;
+  case TestScenario::Offline:
+    for (size_t i = 0; i < n_threads; i++) {
+      threads.push_back(std::thread(RegisterIssueQueryThread<TestScenario::Offline>));
+    }
+    break;
+  case TestScenario::Server:
+    for (size_t i = 0; i < n_threads; i++) {
+      threads.push_back(std::thread(RegisterIssueQueryThread<TestScenario::Server>));
+    }
+    break;
+  default:
+  case TestScenario::SingleStream:
+    for (size_t i = 0; i < n_threads; i++) {
+      threads.push_back(std::thread(RegisterIssueQueryThread<TestScenario::SingleStream>));
+    }
+    break;
   }
 }
 SUT::~SUT() {

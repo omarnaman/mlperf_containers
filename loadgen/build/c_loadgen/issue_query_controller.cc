@@ -21,10 +21,14 @@ limitations under the License.
 #include <iostream>
 
 namespace mlperf {
-
-// template <TestScenario scenario>
+template void RegisterIssueQueryThread<TestScenario::SingleStream>();
+template void RegisterIssueQueryThread<TestScenario::MultiStream>();
+template void RegisterIssueQueryThread<TestScenario::MultiStreamFree>();
+template void RegisterIssueQueryThread<TestScenario::Offline>();
+template void RegisterIssueQueryThread<TestScenario::Server>();
+template <TestScenario scenario>
 void RegisterIssueQueryThread() {
-  loadgen::IssueQueryController::GetInstance().RegisterThread<TestScenario::SingleStream>();
+  loadgen::IssueQueryController::GetInstance().RegisterThread<scenario>();
 }
 
 /// \brief Loadgen implementation details.
@@ -57,8 +61,7 @@ QueryMetadata::QueryMetadata(QueryMetadata& src, SequenceGen* sequence_gen)
       samples_.reserve(wait_count_);
     query_to_send.reserve(wait_count_);
     for (auto&& sample : src.samples_) {
-      samples_.push_back({this, sequence_gen->NextSampleId(), sample.sample_index,
-                          sample.accuracy_log_val});
+      samples_.push_back({this, sequence_gen->NextSampleId(), sample.sample_index, sequence_gen->NextAccLogRng()});
     }
     for (auto&& sample : samples_) {
     query_to_send.push_back({reinterpret_cast<ResponseId>(&sample), sample.sample_index});
@@ -381,8 +384,7 @@ void IssueQueryController::StartIssueQueries(IssueQueryState* s) {
   state->start_time = PerfClock::now();
 
   if (num_threads != 0) {
-    // If server_num_issue_query_threads is non-zero, issue queries on the
-    // registered threads.
+    // issue queries on the registered threads.
     // Tell all threads to start issuing queries.
     {
       std::unique_lock<std::mutex> lock(mtx);
@@ -401,7 +403,6 @@ void IssueQueryController::StartIssueQueries(IssueQueryState* s) {
     }
     cond_var.notify_all();
   } else {
-    // Usually, we just use the same thread to issue queries.
     IssueQueriesInternal<scenario, false>(1, 0);
   }
 }

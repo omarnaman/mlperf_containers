@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <iostream>
 
 #include "dataset.h"
 #include "issue_query_controller.h"
@@ -17,9 +18,10 @@ namespace mlperf {
 RunnerBase::RunnerBase(Dataset* dataset) {
   puts("RunnerBase Constructor");
   this->dataset = dataset;
-  queries_sent = 0;
 }
-RunnerBase::~RunnerBase() { puts("RunnerRemote Constructor"); }
+RunnerBase::~RunnerBase() { 
+  puts("RunnerBase Destructor"); 
+}
 
 void RunnerBase::init() {}
 

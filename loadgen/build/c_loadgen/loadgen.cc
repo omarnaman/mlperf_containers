@@ -286,17 +286,17 @@ std::vector<QueryMetadata> GenerateQueries(
       }
     } else {
       for (auto& s : samples) {
-        s = loaded_samples[
-          settings.performance_issue_unique ? sample_distribution_unique(sample_rng)
-          : settings.performance_issue_same ? same_sample
-          : sample_distribution(sample_rng)];
+        s = loaded_samples[settings.performance_issue_unique
+                               ? sample_distribution_unique(sample_rng)
+                           : settings.performance_issue_same
+                               ? same_sample
+                               : sample_distribution(sample_rng)];
       }
     }
     queries.emplace_back(samples, timestamp, response_delegate, sequence_gen);
-    for (size_t i = 0; i <  num_threads - (num_threads? 1:0); i++) {
+    for (size_t i = 0; i < num_threads - (num_threads ? 1 : 0); i++) {
       queries.emplace_back(queries.back(), sequence_gen);
     }
-
     prev_timestamp = timestamp;
     timestamp += schedule_distribution(schedule_rng);
   }

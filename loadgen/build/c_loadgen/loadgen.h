@@ -74,6 +74,7 @@ void AbortTest();
 /// This is the C++ entry point. See mlperf::c::RegisterIssueQueryThread for the
 /// C entry point.
 ///
+template <TestScenario scenario>
 void RegisterIssueQueryThread();
 
 /// @}
