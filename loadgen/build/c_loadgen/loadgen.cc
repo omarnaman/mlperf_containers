@@ -806,7 +806,6 @@ void PerformanceSummary::LogSummary(AsyncSummary& summary) {
     summary("QPS w/ loadgen overhead         : " + DoubleToString(qps_w_lg));
     summary("QPS w/o loadgen overhead        : " + DoubleToString(qps_wo_lg));
     summary("");
-    summary.LogQpsAndLatencies(qps_w_lg, pr.sample_latencies);
   } else if (settings.scenario == TestScenario::Server) {
     double qps_as_completed =
         (sample_count - 1) / pr.final_query_all_samples_done_time;
