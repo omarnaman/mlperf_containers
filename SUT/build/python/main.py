@@ -123,9 +123,8 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
 
 
     def StreamInferenceItem(self, request_iterator, context):
-        result_gen = self._handleRequestIterator(request_iterator)
-        while True:
-            yield next(result_gen)
+        for request in request_iterator:
+            yield self._inferenceItem(request)
 
 
     def ChangeThreads(self, request, context):
