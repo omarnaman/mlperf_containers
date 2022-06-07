@@ -147,6 +147,8 @@ def get_args(extra_args: List[str]):
     parser.add_argument("--runtime", type=str, help="the runtime name", default="onnxruntime")
     parser.add_argument("--consumer-threads", type=int, default=2,
                         help="the number of consumer threads each client gets")
+    parser.add_argument("--worker-threads", type=int, default=32,
+                        help="the number of worker processes allocated by grpc")
     args = parser.parse_args(extra_args)
     print(args)
     if args.model_path is None and args.model is None:
@@ -169,7 +171,7 @@ def serve(extra_args: List[str]):
             
     backend = get_backend(runtime)
     print("Listening on [0.0.0.0:8086]...")
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=32))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=args.worker_threads))
     basic_pb2_grpc.add_BasicServiceServicer_to_server(
         BasicServiceServicer(backend, model_path, None, ['num_detections:0','detection_boxes:0','detection_scores:0','detection_classes:0'], threads=args.model_threads, consumers_per_client=args.consumer_threads), server)
     server.add_insecure_port('0.0.0.0:8086')
