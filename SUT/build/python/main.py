@@ -126,6 +126,12 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
         for request in request_iterator:
             yield self._inferenceItem(request)
 
+    def StreamInferenceItem(self, request_iterator, context):
+        with ThreadPool(processes=self.consumers_per_client) as p:
+            iter = p.imap_unordered(self._inferenceItem, request_iterator)
+            for res in iter:
+                yield res
+
 
     def ChangeThreads(self, request, context):
         n = request.threads
