@@ -6,5 +6,4 @@ shift;
 wget $model_url -O model.tar.gz
 tar -xzf model.tar.gz -C ./model
 
-set -- ${NONTC[@]}
-python3 ./python/main.py $@ --model-path=model
+python3 ./python/main.py $@
