@@ -1,4 +1,5 @@
 onnxruntime
+tensorflow
 grpcio
 requests
 tqdm
