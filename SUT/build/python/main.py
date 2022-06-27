@@ -198,18 +198,10 @@ def serve(extra_args: List[str]):
 
 
 def main():
+    import sys
     parser = argparse.ArgumentParser()
-    parser.add_argument('mlcube_task', type=str, help="Task for this MLCube.")
-    # parser.add_argument('--log_dir', '--log-dir', type=str, required=True, help="Logging directory.")
-    mlcube_args, extra_args = parser.parse_known_args()
-    task = mlcube_args.mlcube_task
 
-    if task == Task.DownloadModel:
-        download_model(extra_args)
-        exit()
-    
-    if task == Task.Serve:
-        serve(extra_args)
+    serve(sys.argv)
 
 if __name__ == '__main__':
     main()

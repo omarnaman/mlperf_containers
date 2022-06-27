@@ -19,4 +19,4 @@ COPY common/setup_tc.sh /workspace/build/
 COPY common/grpc_proto/python/*.py /workspace/build/python/
 
 WORKDIR /workspace/build
-ENTRYPOINT ["bash", "./run_sut.sh", "serve", "--model", "ssd-mobilenet"]
+ENTRYPOINT ["bash", "./run_sut.sh"]
