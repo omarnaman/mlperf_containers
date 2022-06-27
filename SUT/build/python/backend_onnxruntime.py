@@ -24,7 +24,7 @@ class BackendOnnxruntime(backend.Backend):
         """image_format. For onnx it is always NCHW."""
         return "NCHW"
 
-    def load(self, model_path, inputs=None, outputs=None, threads=0):
+    def load(self, model_path, inputs=None, outputs=None, threads=0, shape=300):
         """Load model and find input/outputs from the model file."""
         opt = rt.SessionOptions()
         # enable level 3 optimizations
@@ -43,11 +43,13 @@ class BackendOnnxruntime(backend.Backend):
             self.outputs = [meta.name for meta in self.sess.get_outputs()]
         else:
             self.outputs = outputs
+        self.shape = (1, int(shape), int(shape), 3)
         return self
     
     def parse_query(self, items: bytes) -> np.ndarray:
         items = np.frombuffer(items, np.uint8)
-        items.shape = (1, 300, 300, 3)
+        items.shape = self.shape
+
         return items
 
     def serialize_response(self, res: np.ndarray) -> bytes:

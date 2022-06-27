@@ -26,7 +26,7 @@ class BackendTensorflow(backend.Backend):
         # By default tensorflow uses NHWC (and the cpu implementation only does NHWC)
         return "NHWC"
 
-    def load(self, model_path, inputs=None, outputs=None):
+    def load(self, model_path, inputs=None, outputs=None, shape=300, threads=0):
         # there is no input/output meta data i the graph so it need to come from config.
         if not inputs:
             raise ValueError("BackendTensorflow needs inputs")
@@ -40,7 +40,7 @@ class BackendTensorflow(backend.Backend):
                 if 'TF_INTRA_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
         infer_config.inter_op_parallelism_threads = int(os.environ['TF_INTER_OP_PARALLELISM_THREADS']) \
                 if 'TF_INTER_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
-        infer_config.use_per_session_threads = 1
+        infer_config.use_per_session_threads = threads
 
         # TODO: support checkpoint and saved_model formats?
         graph_def = tf.compat.v1.GraphDef()
@@ -52,12 +52,32 @@ class BackendTensorflow(backend.Backend):
                         [item.split(':')[0] for item in outputs], as_datatype_enum, False)
                 graph_def = optimized_graph_def
                 break
-            except ValueError:
+            except (ValueError, KeyError):
                 pass
 
         g = tf.compat.v1.import_graph_def(graph_def, name='')
         self.sess = tf.compat.v1.Session(graph=g, config=infer_config)
+        self.shape = (1, int(shape), int(shape), 3)
         return self
+
+
+    def parse_query(self, items: bytes) -> np.ndarray:
+
+        items = np.frombuffer(items, np.uint8)
+        items.shape = self.shape
+
+        return items
+
+    def serialize_response(self, res: list) -> bytes:
+        """
+        (1,)        float32 number of objects
+        (1, 100, 4) float32 bounding boxes
+        (1, 100)    float32 confidence
+        (1, 100)    float32 classes (labels)
+        """
+        # results = res[0].tobytes() + res[2].tobytes() + res[3].tobytes() + res[1].tobytes()
+        return b""
+        # return results
 
     def predict(self, feed):
         return self.sess.run(self.outputs, feed_dict=feed)

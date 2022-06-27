@@ -65,8 +65,8 @@ def get_backend(backend):
 
 class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
     model = None
-    def __init__(self, backend, model_path, inputs, outputs, threads=0, consumers_per_client=3) -> None:
-        self.model = backend.load(model_path, inputs=inputs, outputs=outputs, threads=threads)
+    def __init__(self, backend, model_path, inputs, outputs, threads=0, consumers_per_client=3, model_shape=300) -> None:
+        self.model = backend.load(model_path, inputs=inputs, outputs=outputs, threads=threads, shape=model_shape)
         self.model_path = model_path
         self.backend = backend
         self.outputs = outputs
@@ -84,12 +84,16 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
         return response
     
     def _inferenceItem(self, request: basic_pb2.RequestItem):
-        items = self.backend.parse_query(request.items)
-        results = self.model.predict({self.model.inputs[0]: items})
-        results = self.backend.serialize_response(results)
-        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
-        return response
-
+        try:
+            items = self.backend.parse_query(request.items)
+            results = self.model.predict({self.model.inputs[0]: items})
+            results = self.backend.serialize_response(results)
+            response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
+            return response
+        except Exception as e:
+            print(e)
+            raise e
+            
     def _pullFromQueue(self, request_queue: Queue, result_queue: Queue):
         while True:
             request = request_queue.get()
@@ -151,6 +155,7 @@ def get_args(extra_args: List[str]):
                         help="the number of threads the model should run for inferencing a single query")
     parser.add_argument("--model-path", type=str, help="the path to the model", required=False)
     parser.add_argument("--model", type=str, help="the name of the model to serve", required=False)
+    parser.add_argument("--model-shape", type=str, help="The dimensions of the images processed by the model", required=False, default=300)
     parser.add_argument("--runtime", type=str, help="the runtime name", default="onnxruntime")
     parser.add_argument("--consumer-threads", type=int, default=2,
                         help="the number of consumer threads each client gets")
