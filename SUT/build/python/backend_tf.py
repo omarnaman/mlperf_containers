@@ -5,8 +5,10 @@ tensorflow backend (https://github.com/tensorflow/tensorflow)
 # pylint: disable=unused-argument,missing-docstring,useless-super-delegation
 
 import tensorflow as tf
-from tensorflow.core.framework import dtypes
+from tensorflow.python.framework import dtypes
+# import dtypes from tensorflow
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
+import numpy as np
 
 import os
 import backend
