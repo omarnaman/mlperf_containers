@@ -161,10 +161,15 @@ def get_args(extra_args: List[str]):
                         help="the number of consumer threads each client gets")
     parser.add_argument("--worker-threads", type=int, default=32,
                         help="the number of worker processes allocated by grpc")
+    parser.add_argument("--inputs", help="model inputs, comma separated", required=False, default=None)
+    parser.add_argument("--outputs", help="model outputs, comma separated", required=False, default='num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0')
     args = parser.parse_args(extra_args)
-    print(args)
     if args.model_path is None and args.model is None:
         raise Exception("Either --model-path or --model needs to be provided")
+    if args.inputs is not None:
+        args.inputs = args.inputs.split(",")
+    if args.outputs is not None:
+        args.outputs = args.outputs.split(",")
     return args
 
 def serve(extra_args: List[str]):
@@ -174,6 +179,7 @@ def serve(extra_args: List[str]):
         model_path = args.model_path
     else:
         model_path = args.model
+    
     if not os.path.exists(model_path):
         print("Model not found, downloading...")
         if args.model is None:
@@ -185,7 +191,7 @@ def serve(extra_args: List[str]):
     print("Listening on [0.0.0.0:8086]...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=args.worker_threads))
     basic_pb2_grpc.add_BasicServiceServicer_to_server(
-        BasicServiceServicer(backend, model_path, None, ['num_detections:0','detection_boxes:0','detection_scores:0','detection_classes:0'], threads=args.model_threads, consumers_per_client=args.consumer_threads), server)
+        BasicServiceServicer(backend, model_path, args.inputs, args.outputs, threads=args.model_threads, consumers_per_client=args.consumer_threads, model_shape=args.model_shape), server)
     server.add_insecure_port('0.0.0.0:8086')
     server.start()
     server.wait_for_termination()
