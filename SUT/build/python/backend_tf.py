@@ -42,6 +42,14 @@ class BackendTensorflow(backend.Backend):
                 if 'TF_INTER_OP_PARALLELISM_THREADS' in os.environ else os.cpu_count()
         infer_config.use_per_session_threads = threads
 
+        # Load SavedModel from directory
+        if tf.io.gfile.isdir(model_path):
+            # load from directory
+            self.sess = tf.compat.v1.Session(config=infer_config)
+            self.shape = (1, int(shape), int(shape), 3)
+            tf.compat.v1.saved_model.load(self.sess, [tf.saved_model.SERVING], model_path)
+            return self
+
         # TODO: support checkpoint and saved_model formats?
         graph_def = tf.compat.v1.GraphDef()
         with tf.compat.v1.gfile.FastGFile(model_path, "rb") as f:
