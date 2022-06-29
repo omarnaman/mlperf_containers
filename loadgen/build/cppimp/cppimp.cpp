@@ -49,9 +49,9 @@ int main(int args, char** argv) {
   const size_t THREADS = testSettings.generic_num_issue_query;
   std::string labels_path = "coco/labels.txt";
   std::string images_path = "coco/images";
-  std::string uspp_path = "uspp_processed";
+  std::string data_path = "coco";
 
-  Dataset* dataset = new CocoDataset(labels_path, images_path);
+  Dataset* dataset = new PreprocessedDataset(data_path);
   RunnerBase* runner = new RemoteStreamer(address, dataset);
   SystemUnderTest* sut = new SUT(runner, THREADS, testScenario);
   QuerySampleLibrary* qsl = new QSL(256, dataset);
