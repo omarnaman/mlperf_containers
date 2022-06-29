@@ -15,7 +15,7 @@ output=`pwd`/cppimp/build
 
 wget "http://$file_storage_address/$config_id" --output-document=cppimp/build/mlperf.conf
 
-aws s3 cp $dataset_url cppimp/build/dataset.tar.gz && \
+aws s3 cp $dataset_URL cppimp/build/dataset.tar.gz && \
 tar -xzf cppimp/build/dataset.tar.gz -C cppimp/build/
 
 cd cppimp/build && ./loadgen $scenario $sut_address && \
