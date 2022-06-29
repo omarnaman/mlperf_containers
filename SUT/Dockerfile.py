@@ -8,6 +8,8 @@ RUN apt-get update && \
             python3-pip \
             python3-opencv \
             iproute2 \
+            protobuf-compiler \
+            wget \
             net-tools && \
     rm -rf /var/lib/apt/lists/*
 
@@ -16,7 +18,11 @@ RUN pip3 install --no-cache-dir -r /requirements.txt
 
 COPY SUT/build /workspace/build/
 COPY common/setup_tc.sh /workspace/build/
-COPY common/grpc_proto/python/*.py /workspace/build/python/
+COPY common /workspace/common/
+ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+WORKDIR /workspace/common/grpc_proto
+RUN protoc -I=. --python_out=python ./basic.proto
+RUN cp python/*.py /workspace/build/python/
 
 # Install aws
 RUN apt-get update && \
