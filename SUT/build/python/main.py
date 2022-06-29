@@ -201,7 +201,7 @@ def main():
     import sys
     parser = argparse.ArgumentParser()
 
-    serve(sys.argv)
+    serve(sys.argv[1:])
 
 if __name__ == '__main__':
     main()
