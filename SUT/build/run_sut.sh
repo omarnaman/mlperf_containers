@@ -5,7 +5,7 @@ set -- ${NONTC[@]}
 model_url=$1
 shift 1;
 
-aws s3 cp $1 model.tar.gz
+aws s3 cp $model_url model.tar.gz
 tar -xzf model.tar.gz
 
 python3 ./python/main.py $@
