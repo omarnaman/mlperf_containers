@@ -88,6 +88,12 @@ COPY common/setup_tc.sh /workspace/loadgen/build/
 COPY loadgen/build/store_results.py /workspace/loadgen/build/
 COPY loadgen/build/run_loadgen_cpp.sh /workspace/loadgen/build/
 
+# Install aws
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends zip &&
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install && \
+    rm -rf /var/lib/apt/lists/*
+
 # Start loadgen
 WORKDIR /workspace/loadgen/build
 ENTRYPOINT ["bash", "./run_loadgen_cpp.sh"]
