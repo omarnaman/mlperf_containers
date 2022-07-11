@@ -9,10 +9,10 @@ REORDER_PERCENT=""
 TC=0
 
 function setupTC () {
-    $delay_arg = ""
-    $bandwidth_arg = ""
-    $random_loss_arg = ""
-    $reorder_arg = ""
+    $delay_arg=""
+    $bandwidth_arg=""
+    $random_loss_arg=""
+    $reorder_arg=""
     if [ "$DELAY" != "" ]; then
         delay_arg="delay $DELAY $JITTER"
     fi
