@@ -9,10 +9,10 @@ REORDER_PERCENT=""
 TC=0
 
 function setupTC () {
-    $delay_arg=""
-    $bandwidth_arg=""
-    $random_loss_arg=""
-    $reorder_arg=""
+    delay_arg=""
+    bandwidth_arg=""
+    random_loss_arg=""
+    reorder_arg=""
     if [ "$DELAY" != "" ]; then
         delay_arg="delay $DELAY $JITTER"
     fi
@@ -25,7 +25,7 @@ function setupTC () {
     if [ "$REORDER_PERCENT" != "" ]; then
         reorder_arg="reorder $REORDER_PERCENT"
     fi
-    tc qdisc add dev $INTERFACE root netem reorder $delay_arg $bandwidth_arg $random_loss_arg $reorder_arg
+    tc qdisc add dev $INTERFACE root netem $delay_arg $bandwidth_arg $random_loss_arg $reorder_arg
     tc qdisc show dev $INTERFACE
 }
 
