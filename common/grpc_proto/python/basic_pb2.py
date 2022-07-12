@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0b\x62\x61sic.proto\"(\n\x0bRequestItem\x12\r\n\x05items\x18\x01 \x01(\x0c\x12\n\n\x02id\x18\x02 \x01(\x04\")\n\nItemResult\x12\x0f\n\x07results\x18\x01 \x01(\x0c\x12\n\n\x02id\x18\x02 \x01(\x04\" \n\rThreadRequest\x12\x0f\n\x07threads\x18\x01 \x01(\x05\"\x19\n\x0bThreadReply\x12\n\n\x02ok\x18\x01 \x01(\x08\x32\x9f\x01\n\x0c\x42\x61sicService\x12*\n\rInferenceItem\x12\x0c.RequestItem\x1a\x0b.ItemResult\x12\x34\n\x13StreamInferenceItem\x12\x0c.RequestItem\x1a\x0b.ItemResult(\x01\x30\x01\x12-\n\rChangeThreads\x12\x0e.ThreadRequest\x1a\x0c.ThreadReplyb\x06proto3'
+  serialized_pb=b'\n\x0b\x62\x61sic.proto\"6\n\x0bRequestItem\x12\r\n\x05items\x18\x01 \x01(\x0c\x12\n\n\x02id\x18\x02 \x01(\x04\x12\x0c\n\x04size\x18\x03 \x01(\x04\"7\n\nItemResult\x12\x0f\n\x07results\x18\x01 \x01(\x0c\x12\n\n\x02id\x18\x02 \x01(\x04\x12\x0c\n\x04size\x18\x03 \x01(\x04\" \n\rThreadRequest\x12\x0f\n\x07threads\x18\x01 \x01(\x05\"\x19\n\x0bThreadReply\x12\n\n\x02ok\x18\x01 \x01(\x08\x32\x9f\x01\n\x0c\x42\x61sicService\x12*\n\rInferenceItem\x12\x0c.RequestItem\x1a\x0b.ItemResult\x12\x34\n\x13StreamInferenceItem\x12\x0c.RequestItem\x1a\x0b.ItemResult(\x01\x30\x01\x12-\n\rChangeThreads\x12\x0e.ThreadRequest\x1a\x0c.ThreadReplyb\x06proto3'
 )
 
 
@@ -47,6 +47,13 @@ _REQUESTITEM = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='size', full_name='RequestItem.size', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -60,7 +67,7 @@ _REQUESTITEM = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=15,
-  serialized_end=55,
+  serialized_end=69,
 )
 
 
@@ -86,6 +93,13 @@ _ITEMRESULT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='size', full_name='ItemResult.size', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -98,8 +112,8 @@ _ITEMRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=57,
-  serialized_end=98,
+  serialized_start=71,
+  serialized_end=126,
 )
 
 
@@ -130,8 +144,8 @@ _THREADREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=100,
-  serialized_end=132,
+  serialized_start=128,
+  serialized_end=160,
 )
 
 
@@ -162,8 +176,8 @@ _THREADREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=134,
-  serialized_end=159,
+  serialized_start=162,
+  serialized_end=187,
 )
 
 DESCRIPTOR.message_types_by_name['RequestItem'] = _REQUESTITEM
@@ -209,8 +223,8 @@ _BASICSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=162,
-  serialized_end=321,
+  serialized_start=190,
+  serialized_end=349,
   methods=[
   _descriptor.MethodDescriptor(
     name='InferenceItem',
