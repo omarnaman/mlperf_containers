@@ -195,6 +195,7 @@ class RequestItem final :
   enum : int {
     kItemsFieldNumber = 1,
     kIdFieldNumber = 2,
+    kSizeFieldNumber = 3,
   };
   // bytes items = 1;
   void clear_items();
@@ -219,6 +220,15 @@ class RequestItem final :
   void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 size = 3;
+  void clear_size();
+  ::PROTOBUF_NAMESPACE_ID::uint64 size() const;
+  void set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_size() const;
+  void _internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:RequestItem)
  private:
   class _Internal;
@@ -228,6 +238,7 @@ class RequestItem final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr items_;
   ::PROTOBUF_NAMESPACE_ID::uint64 id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 size_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_basic_2eproto;
 };
@@ -354,6 +365,7 @@ class ItemResult final :
   enum : int {
     kResultsFieldNumber = 1,
     kIdFieldNumber = 2,
+    kSizeFieldNumber = 3,
   };
   // bytes results = 1;
   void clear_results();
@@ -378,6 +390,15 @@ class ItemResult final :
   void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 size = 3;
+  void clear_size();
+  ::PROTOBUF_NAMESPACE_ID::uint64 size() const;
+  void set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_size() const;
+  void _internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:ItemResult)
  private:
   class _Internal;
@@ -387,6 +408,7 @@ class ItemResult final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr results_;
   ::PROTOBUF_NAMESPACE_ID::uint64 id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 size_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_basic_2eproto;
 };
@@ -753,6 +775,26 @@ inline void RequestItem::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:RequestItem.id)
 }
 
+// uint64 size = 3;
+inline void RequestItem::clear_size() {
+  size_ = uint64_t{0u};
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 RequestItem::_internal_size() const {
+  return size_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 RequestItem::size() const {
+  // @@protoc_insertion_point(field_get:RequestItem.size)
+  return _internal_size();
+}
+inline void RequestItem::_internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  size_ = value;
+}
+inline void RequestItem::set_size(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_size(value);
+  // @@protoc_insertion_point(field_set:RequestItem.size)
+}
+
 // -------------------------------------------------------------------
 
 // ItemResult
@@ -821,6 +863,26 @@ inline void ItemResult::_internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) 
 inline void ItemResult::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_id(value);
   // @@protoc_insertion_point(field_set:ItemResult.id)
+}
+
+// uint64 size = 3;
+inline void ItemResult::clear_size() {
+  size_ = uint64_t{0u};
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ItemResult::_internal_size() const {
+  return size_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ItemResult::size() const {
+  // @@protoc_insertion_point(field_get:ItemResult.size)
+  return _internal_size();
+}
+inline void ItemResult::_internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  size_ = value;
+}
+inline void ItemResult::set_size(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_size(value);
+  // @@protoc_insertion_point(field_set:ItemResult.size)
 }
 
 // -------------------------------------------------------------------

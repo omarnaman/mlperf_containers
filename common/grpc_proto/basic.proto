@@ -8,11 +8,13 @@ service BasicService {
 message RequestItem {
     bytes items = 1;
     uint64 id = 2;
+    uint64 size = 3;
 }
 
 message ItemResult {
     bytes results = 1;
     uint64 id = 2;
+    uint64 size = 3;
 }
 
 message ThreadRequest {

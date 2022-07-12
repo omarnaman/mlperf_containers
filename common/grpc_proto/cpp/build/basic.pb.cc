@@ -19,7 +19,8 @@ PROTOBUF_PRAGMA_INIT_SEG
 constexpr RequestItem::RequestItem(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : items_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(uint64_t{0u}){}
+  , id_(uint64_t{0u})
+  , size_(uint64_t{0u}){}
 struct RequestItemDefaultTypeInternal {
   constexpr RequestItemDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -32,7 +33,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RequestItemDefaultTypeInternal 
 constexpr ItemResult::ItemResult(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : results_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , id_(uint64_t{0u}){}
+  , id_(uint64_t{0u})
+  , size_(uint64_t{0u}){}
 struct ItemResultDefaultTypeInternal {
   constexpr ItemResultDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -79,6 +81,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_basic_2eproto::offsets[] PROTO
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::RequestItem, items_),
   PROTOBUF_FIELD_OFFSET(::RequestItem, id_),
+  PROTOBUF_FIELD_OFFSET(::RequestItem, size_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::ItemResult, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -87,6 +90,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_basic_2eproto::offsets[] PROTO
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::ItemResult, results_),
   PROTOBUF_FIELD_OFFSET(::ItemResult, id_),
+  PROTOBUF_FIELD_OFFSET(::ItemResult, size_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::ThreadRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -104,9 +108,9 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_basic_2eproto::offsets[] PROTO
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::RequestItem)},
-  { 8, -1, -1, sizeof(::ItemResult)},
-  { 16, -1, -1, sizeof(::ThreadRequest)},
-  { 23, -1, -1, sizeof(::ThreadReply)},
+  { 9, -1, -1, sizeof(::ItemResult)},
+  { 18, -1, -1, sizeof(::ThreadRequest)},
+  { 25, -1, -1, sizeof(::ThreadReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -117,19 +121,19 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_basic_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\013basic.proto\"(\n\013RequestItem\022\r\n\005items\030\001 "
-  "\001(\014\022\n\n\002id\030\002 \001(\004\")\n\nItemResult\022\017\n\007results"
-  "\030\001 \001(\014\022\n\n\002id\030\002 \001(\004\" \n\rThreadRequest\022\017\n\007t"
-  "hreads\030\001 \001(\005\"\031\n\013ThreadReply\022\n\n\002ok\030\001 \001(\0102"
-  "\237\001\n\014BasicService\022*\n\rInferenceItem\022\014.Requ"
-  "estItem\032\013.ItemResult\0224\n\023StreamInferenceI"
-  "tem\022\014.RequestItem\032\013.ItemResult(\0010\001\022-\n\rCh"
-  "angeThreads\022\016.ThreadRequest\032\014.ThreadRepl"
-  "yb\006proto3"
+  "\n\013basic.proto\"6\n\013RequestItem\022\r\n\005items\030\001 "
+  "\001(\014\022\n\n\002id\030\002 \001(\004\022\014\n\004size\030\003 \001(\004\"7\n\nItemRes"
+  "ult\022\017\n\007results\030\001 \001(\014\022\n\n\002id\030\002 \001(\004\022\014\n\004size"
+  "\030\003 \001(\004\" \n\rThreadRequest\022\017\n\007threads\030\001 \001(\005"
+  "\"\031\n\013ThreadReply\022\n\n\002ok\030\001 \001(\0102\237\001\n\014BasicSer"
+  "vice\022*\n\rInferenceItem\022\014.RequestItem\032\013.It"
+  "emResult\0224\n\023StreamInferenceItem\022\014.Reques"
+  "tItem\032\013.ItemResult(\0010\001\022-\n\rChangeThreads\022"
+  "\016.ThreadRequest\032\014.ThreadReplyb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_basic_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_basic_2eproto = {
-  false, false, 329, descriptor_table_protodef_basic_2eproto, "basic.proto", 
+  false, false, 357, descriptor_table_protodef_basic_2eproto, "basic.proto", 
   &descriptor_table_basic_2eproto_once, nullptr, 0, 4,
   schemas, file_default_instances, TableStruct_basic_2eproto::offsets,
   file_level_metadata_basic_2eproto, file_level_enum_descriptors_basic_2eproto, file_level_service_descriptors_basic_2eproto,
@@ -164,13 +168,18 @@ RequestItem::RequestItem(const RequestItem& from)
     items_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_items(), 
       GetArenaForAllocation());
   }
-  id_ = from.id_;
+  ::memcpy(&id_, &from.id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&size_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(size_));
   // @@protoc_insertion_point(copy_constructor:RequestItem)
 }
 
 void RequestItem::SharedCtor() {
 items_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-id_ = uint64_t{0u};
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&id_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&size_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(size_));
 }
 
 RequestItem::~RequestItem() {
@@ -202,7 +211,9 @@ void RequestItem::Clear() {
   (void) cached_has_bits;
 
   items_.ClearToEmpty();
-  id_ = uint64_t{0u};
+  ::memset(&id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&size_) -
+      reinterpret_cast<char*>(&id_)) + sizeof(size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -225,6 +236,14 @@ const char* RequestItem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint64 size = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -270,6 +289,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_id(), target);
   }
 
+  // uint64 size = 3;
+  if (this->_internal_size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_size(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -296,6 +321,11 @@ size_t RequestItem::ByteSizeLong() const {
   // uint64 id = 2;
   if (this->_internal_id() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
+  }
+
+  // uint64 size = 3;
+  if (this->_internal_size() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -326,6 +356,9 @@ void RequestItem::MergeFrom(const RequestItem& from) {
   if (from._internal_id() != 0) {
     _internal_set_id(from._internal_id());
   }
+  if (from._internal_size() != 0) {
+    _internal_set_size(from._internal_size());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -350,7 +383,12 @@ void RequestItem::InternalSwap(RequestItem* other) {
       &items_, lhs_arena,
       &other->items_, rhs_arena
   );
-  swap(id_, other->id_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RequestItem, size_)
+      + sizeof(RequestItem::size_)
+      - PROTOBUF_FIELD_OFFSET(RequestItem, id_)>(
+          reinterpret_cast<char*>(&id_),
+          reinterpret_cast<char*>(&other->id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RequestItem::GetMetadata() const {
@@ -382,13 +420,18 @@ ItemResult::ItemResult(const ItemResult& from)
     results_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_results(), 
       GetArenaForAllocation());
   }
-  id_ = from.id_;
+  ::memcpy(&id_, &from.id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&size_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(size_));
   // @@protoc_insertion_point(copy_constructor:ItemResult)
 }
 
 void ItemResult::SharedCtor() {
 results_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-id_ = uint64_t{0u};
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&id_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&size_) -
+    reinterpret_cast<char*>(&id_)) + sizeof(size_));
 }
 
 ItemResult::~ItemResult() {
@@ -420,7 +463,9 @@ void ItemResult::Clear() {
   (void) cached_has_bits;
 
   results_.ClearToEmpty();
-  id_ = uint64_t{0u};
+  ::memset(&id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&size_) -
+      reinterpret_cast<char*>(&id_)) + sizeof(size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -443,6 +488,14 @@ const char* ItemResult::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint64 size = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -488,6 +541,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_id(), target);
   }
 
+  // uint64 size = 3;
+  if (this->_internal_size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_size(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -514,6 +573,11 @@ size_t ItemResult::ByteSizeLong() const {
   // uint64 id = 2;
   if (this->_internal_id() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
+  }
+
+  // uint64 size = 3;
+  if (this->_internal_size() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_size());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -544,6 +608,9 @@ void ItemResult::MergeFrom(const ItemResult& from) {
   if (from._internal_id() != 0) {
     _internal_set_id(from._internal_id());
   }
+  if (from._internal_size() != 0) {
+    _internal_set_size(from._internal_size());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -568,7 +635,12 @@ void ItemResult::InternalSwap(ItemResult* other) {
       &results_, lhs_arena,
       &other->results_, rhs_arena
   );
-  swap(id_, other->id_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ItemResult, size_)
+      + sizeof(ItemResult::size_)
+      - PROTOBUF_FIELD_OFFSET(ItemResult, id_)>(
+          reinterpret_cast<char*>(&id_),
+          reinterpret_cast<char*>(&other->id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ItemResult::GetMetadata() const {
