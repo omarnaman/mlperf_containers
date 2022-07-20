@@ -249,3 +249,98 @@ void PreprocessedDataset::loadSamples(const std::vector<size_t>& samples) {
 }
 
 #pragma endregion Preprocessed
+
+#pragma region SynthRequestDataset
+  SynthRequestDataset::SynthRequestDataset(std::string& config_path): config_path{config_path} {
+    loadDataset();
+  }
+  SynthRequestDataset::~SynthRequestDataset() {
+    delete this->synthData;
+  }
+
+  void SynthRequestDataset::SynthRequestDataset::loadDataset() {
+    std::ifstream config_file(config_path);
+    config_file >> this->micros_duration >> this->upload_size;
+    config_file.close();
+    synthData = new char[upload_size];
+    memset(synthData, -1, upload_size);
+    return;
+  };
+  void SynthRequestDataset::loadSamples(const std::vector<size_t>& samples) {};
+  mlperf::Data* SynthRequestDataset::getSample(const int& index) {
+    Data* item = new Data();
+    memset(item, 0, sizeof(item));
+    item->data = new char[sizeof(u_int64_t) + upload_size];
+    memcpy(item->data, &(this->micros_duration), sizeof(u_int64_t));
+    memcpy(item->data + sizeof(u_int64_t), synthData, upload_size);
+    item->size = sizeof(u_int64_t) + upload_size;
+    return item;
+  };
+  size_t SynthRequestDataset::getNumberOfSamples() {
+    return INT16_MAX;
+  }
+#pragma endregion SynthRequestDataset
+
+#pragma region SynthIODataset
+  SynthIODataset::SynthIODataset(std::string& config_path): config_path{config_path} {
+    loadDataset();
+  }
+  SynthIODataset::~SynthIODataset() {}
+
+  void SynthIODataset::loadDataset() {
+    int fsync = 0;
+    std::ifstream config_file(config_path);
+    config_file >> this->file_size >> this->burst_size >> fsync;
+    config_file.close();
+    this->fsync = fsync&1;
+    return;
+  };
+  
+  void SynthIODataset::loadSamples(const std::vector<size_t>& samples){}
+  mlperf::Data* SynthIODataset::getSample(const int& index){
+    size_t data_size = sizeof(this->file_size) + sizeof(this->burst_size) + sizeof(this->fsync); 
+    Data* item = new Data();
+    memset(item, 0, sizeof(item));
+    item->data = new char[data_size];
+    char* pointer = item->data;
+    memcpy(pointer, &(this->file_size), sizeof(this->file_size));
+    pointer += sizeof(this->file_size);
+    memcpy(pointer, &(this->burst_size), sizeof(this->burst_size));
+    pointer += sizeof(this->burst_size);
+    memcpy(pointer, &(this->fsync), sizeof(this->fsync));
+    pointer += sizeof(this->fsync);
+    item->size = data_size;
+    return item;
+  };
+  size_t SynthIODataset::getNumberOfSamples() {
+    return INT16_MAX;
+  };
+
+#pragma endregion SynthIODataset
+#pragma region SynthCPUDataset
+  SynthCPUDataset::SynthCPUDataset(std::string& config_path) : config_path{config_path} {
+    loadDataset();
+  }
+  SynthCPUDataset::~SynthCPUDataset() {}
+
+  void SynthCPUDataset::loadDataset()  {
+    std::ifstream config_file(config_path);
+    config_file >> this->micros_duration;
+    config_file.close();
+    return;
+  }
+  void SynthCPUDataset::loadSamples(const std::vector<size_t>& samples) {};
+  mlperf::Data* SynthCPUDataset::getSample(const int& index) {
+    Data* item = new Data();
+    memset(item, 0, sizeof(item));
+    item->data = new char[sizeof(this->micros_duration)];
+    memcpy(item->data, &(this->micros_duration), sizeof(this->micros_duration));
+    item->size = sizeof(this->micros_duration);
+    return item;
+  };
+  
+  size_t SynthCPUDataset::getNumberOfSamples(){
+    return INT16_MAX;
+  };
+#pragma endregion SynthCPUDataset
+

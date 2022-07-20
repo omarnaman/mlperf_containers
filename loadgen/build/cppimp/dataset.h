@@ -68,4 +68,48 @@ class PreprocessedDataset : public mlperf::Dataset {
   size_t getNumberOfSamples() override;
 };
 
+class SynthRequestDataset : public mlperf::Dataset {
+ private:
+  uint64_t micros_duration;
+  size_t upload_size;
+  std::string config_path;
+  char* synthData;
+ public:
+  SynthRequestDataset(std::string& config_path);
+  ~SynthRequestDataset();
+
+  void loadDataset() override;
+  void loadSamples(const std::vector<size_t>& samples) override;
+  mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
+};
+class SynthIODataset : public mlperf::Dataset {
+ private:
+  size_t file_size;
+  size_t burst_size;
+  bool fsync;
+  std::string config_path;
+ public:
+  SynthIODataset(std::string& config_path);
+  ~SynthIODataset();
+
+  void loadDataset() override;
+  void loadSamples(const std::vector<size_t>& samples) override;
+  mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
+};
+class SynthCPUDataset : public mlperf::Dataset {
+ private:
+  uint64_t micros_duration;
+  std::string config_path;
+ public:
+  SynthCPUDataset(std::string& config_path);
+  ~SynthCPUDataset();
+
+  void loadDataset() override;
+  void loadSamples(const std::vector<size_t>& samples) override;
+  mlperf::Data* getSample(const int& index) override;
+  size_t getNumberOfSamples() override;
+};
+
 #endif
