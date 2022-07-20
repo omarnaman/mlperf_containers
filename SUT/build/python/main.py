@@ -78,9 +78,8 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
     def InferenceItem(self, request: basic_pb2.RequestItem, context: grpc.ServicerContext):
         items = self.backend.parse_query(request.items)
         results = self.model.predict({self.model.inputs[0]: items})
-        
         results = self.backend.serialize_response(results)
-        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
+        response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id, size=len(results))
         return response
     
     def _inferenceItem(self, request: basic_pb2.RequestItem):
@@ -88,7 +87,7 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
             items = self.backend.parse_query(request.items)
             results = self.model.predict({self.model.inputs[0]: items})
             results = self.backend.serialize_response(results)
-            response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id)
+            response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id, size=len(results))
             return response
         except Exception as e:
             print(e)
