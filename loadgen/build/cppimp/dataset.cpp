@@ -95,7 +95,7 @@ void CocoDataset::loadDataset() {
   char tmp[1000];
   getcwd(tmp, 999);
   std::ifstream labels_file, image_file;
-  std::map<std::string, int> labels_map;
+  std::map<std::string, std::string> labels_map;
   labels_file.open(labelsPath, std::ios::in);
   assert(labels_file.is_open());
   std::string image_name;
@@ -106,7 +106,7 @@ void CocoDataset::loadDataset() {
   std::vector<std::string> image_list = listDir(imageDir);
   Data* item;
   for (auto&& image : image_list) {
-    std::map<std::string, int>::iterator iter = labels_map.find(image);
+    std::map<std::string, std::string>::iterator iter = labels_map.find(image);
     if (iter == labels_map.end()) {
       std::cerr << "No label found for: " << image << std::endl;
       continue;
@@ -119,7 +119,8 @@ void CocoDataset::loadDataset() {
     assert(image_file.is_open());
     item->size = image_file.tellg();
     item->data = NULL;
-    item->label = iter->second;
+    item->label = new char[image.size()+1];
+    strcpy(item->label, image.c_str());
     dataPoints->push_back(item);
     image_file.close();
   }
@@ -150,23 +151,17 @@ void CocoDataset::loadSamples(const std::vector<size_t>& samples) {
   }
 }
 
-void CocoDataset::postProcess(const char* data, size_t size) {
-  float* data_float = (float*)data;
-  float noi = *data_float++;
-
-  std::vector<std::vector<float>> bounding;
-  std::vector<float> confidence;
-  std::vector<float> label;
-
-  confidence.assign(data_float, data_float + 100);
-  data_float += 100;
-  label.assign(data_float, data_float + 100);
-  data_float += 100;
-  for (int i = 0; i < noi; i++) {
-    bounding.push_back(std::vector<float>());
-    bounding[i].assign(data_float, data_float + 4);
-    data_float += 4;
+void CocoDataset::postProcess(const char* data, size_t size, const char* label) {
+  int8_t* data_ptr = (int8_t*)data;
+  size_t number_of_detected_objects = size;
+  this->resultsFile << label << std::endl;
+  for (size_t i = 0; i < number_of_detected_objects; i++) {
+    assert(data_ptr[i] <= categories.size() && data_ptr[i] > 0);
+    this->resultsFile << (int)data_ptr[i] << " ";
   }
+  delete[] data;
+  this->resultsFile << std::endl;
+
 }
 #pragma endregion CocoDataset
 

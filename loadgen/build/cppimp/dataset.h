@@ -48,7 +48,7 @@ class CocoDataset : public mlperf::Dataset {
   void loadDataset() override;
   void loadSamples(const std::vector<size_t>& samples) override;
   mlperf::Data* getSample(const int& index) override;
-  void postProcess(const char* data, size_t size) override;
+  void postProcess(const char* data, size_t size, const char* label) override;
   size_t getNumberOfSamples() override;
 };
 
