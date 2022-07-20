@@ -47,7 +47,7 @@ Data* StringDataset::getSample(const int& index) {
   Data* res = new Data();
   res->data = new char[10];
   res->size = 10 * sizeof(char);
-  res->data = "123456789\0";
+  memcpy(res->data, "123456789\0", 10);
   res->label = 0;
   return res;
 }

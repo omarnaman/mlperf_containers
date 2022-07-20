@@ -69,7 +69,7 @@ size_t QSL::TotalSampleCount() { return total_sample_count; }
 size_t QSL::PerformanceSampleCount() { return performance_sample_count; }
 
 void QSL::LoadSamplesToRam(const std::vector<QuerySampleIndex>& samples) {
-  printf("Loading into ram %u samples\n", samples.size());
+  printf("Loading into ram %zu samples\n", samples.size());
   this->dataset->loadSamples(samples);
 }
 void QSL::UnloadSamplesFromRam(const std::vector<QuerySampleIndex>& samples) {}
