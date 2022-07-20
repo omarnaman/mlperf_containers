@@ -74,7 +74,8 @@ std::vector<std::string> CocoDataset::listDir(const std::string& dirPath) {
   DIR* dir_fd = opendir(dirPath.c_str());
   std::vector<std::string> filelist;
   if (!dir_fd) {
-    std::cerr << "Im dead lol\n";
+    std::cerr << "Directory \""<< dirPath <<"\" could not be opened\n";
+    exit(1);
     return filelist;
   }
   dirent* file;
@@ -180,6 +181,8 @@ std::vector<std::string> PreprocessedDataset::listDir(
   DIR* dir_fd = opendir(dir_path.c_str());
   std::vector<std::string> filelist;
   if (!dir_fd) {
+    std::cerr << "Directory \""<< dir_path <<"\" could not be opened\n";
+    exit(1);
     return filelist;
   }
   dirent* file;
