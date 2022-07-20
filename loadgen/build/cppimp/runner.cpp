@@ -17,7 +17,9 @@ using namespace mlperf;
 QuerySampleResponse RunnerRemote::predict(const Data* item) {
   RequestData* res = client->predict(item->data, item->size, item->id);
   assert(res);
-  this->dataset->postProcess(res->items, res->size);
+  this->dataset->postProcess(res->items, res->size, item->label);
+  delete[] item->label;
+  delete[] item->data;
   return QuerySampleResponse{
       .id = res->id, .data = (uintptr_t)res->items, .size = res->size};
 }
