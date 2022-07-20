@@ -22,29 +22,30 @@ struct IOQueryResponse {
   int error_code;
 };
 
-class IOModel : public BaseModel<IOQueryParam, IOQueryResponse> {
+class IOModel : public BaseModel {
  public:
-  IOQueryParam parseQuery(const std::string& query) override {
+  void* parseQuery(const std::string& query, size_t size) override {
     const char* p = query.data();
-    IOQueryParam params;
-    params.file_size = *((size_t*)p);
+    IOQueryParam* params = new IOQueryParam;
+    params->file_size = *((size_t*)p);
     p += sizeof(size_t);
-    params.burst_size = *((size_t*)p);
+    params->burst_size = *((size_t*)p);
     p += sizeof(size_t);
-    params.fsync = *((size_t*)p);
+    params->fsync = *((bool*)p);
     p += sizeof(bool);
     return params;
   }
-  std::string runQuery(const IOQueryParam& queryParameters) override {
+  std::string runQuery(const void* queryParameters) override {
+    const IOQueryParam* params = (IOQueryParam*)queryParameters;
     int out = open("tmpfile", O_SYNC | O_TRUNC | O_CREAT | O_WRONLY);
     assert(out > 0);
     size_t written_bytes = 0;
     ssize_t written = 0;
-    const char* data = new char[queryParameters.burst_size];
-    while (written_bytes < queryParameters.file_size) {
-      size_t to_write = std::min(queryParameters.file_size - written_bytes, queryParameters.burst_size);
+    const char* data = new char[params->burst_size];
+    while (written_bytes < params->file_size) {
+      size_t to_write = std::min(params->file_size - written_bytes, params->burst_size);
 
-      if (queryParameters.fsync) {
+      if (params->fsync) {
         written = write(out, data, to_write);
         assert(written > 0);
       }
@@ -52,14 +53,16 @@ class IOModel : public BaseModel<IOQueryParam, IOQueryResponse> {
     }
 
     delete data;
-    IOQueryResponse response;
-    response.error_code = 0;
-    response.time_taken = 0;
+    IOQueryResponse* response = new IOQueryResponse;
+    response->error_code = 0;
+    response->time_taken = 0;
+    delete params;
     return serializeResponse(response);
   }
-  std::string serializeResponse(const IOQueryResponse& response) override {
+  std::string serializeResponse(const void* response) override {
     std::string ser_res;
     ser_res.assign((char*)&response, sizeof(IOQueryResponse));
+    delete response;
     return ser_res;
   }
 };

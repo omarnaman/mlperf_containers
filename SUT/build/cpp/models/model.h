@@ -7,13 +7,12 @@
 #include <string>
 
 
-template <class QueryParam, class Response>
 class BaseModel {
  private:
  public:
-  virtual QueryParam parseQuery(const std::string& query) = 0;
-  virtual std::string runQuery(const QueryParam& queryParameters) = 0;
-  virtual std::string serializeResponse(const Response& response) = 0;
+  virtual void* parseQuery(const std::string& query, size_t size) = 0;
+  virtual std::string runQuery(const void* queryParameters) = 0;
+  virtual std::string serializeResponse(const void* response) = 0;
 };
 
 

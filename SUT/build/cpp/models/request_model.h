@@ -18,36 +18,39 @@ struct ReqQueryResponse {
   int error_code;
 };
 
-class RequestModel : public BaseModel<ReqQueryParam, ReqQueryResponse> {
+class RequestModel : public BaseModel {
  public:
-  ReqQueryParam parseQuery(const std::string& query) override {
+  void* parseQuery(const std::string& query, size_t size) override {
     const char* p = query.data();
-    ReqQueryParam params;
-    params.sleep_time = *((u_int64_t*)p);
+    ReqQueryParam* params = new ReqQueryParam;
+    params->sleep_time = *((u_int64_t*)p);
     return params;
   }
 
-  auto awake_time(u_int64_t sleep_time) {
+  inline auto awake_time(u_int64_t sleep_time) {
     return std::chrono::steady_clock::now() + std::chrono::microseconds(sleep_time);
   }
-  std::string runQuery(const ReqQueryParam& queryParameters) override {
+  std::string runQuery(const void* queryParameters) override {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
 
-    std::this_thread::sleep_until(awake_time(queryParameters.sleep_time));
+    const ReqQueryParam* params = (ReqQueryParam*)queryParameters;
+  
+    std::this_thread::sleep_for(std::chrono::duration<double, std::micro>(params->sleep_time));
 
     end = std::chrono::system_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << "\n";
 
-    ReqQueryResponse response;
-    response.error_code = 0;
-    response.time_taken = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    ReqQueryResponse* response = new ReqQueryResponse;
+    response->error_code = 0;
+    response->time_taken = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
+    delete params;
     return serializeResponse(response);
   }
-  std::string serializeResponse(const ReqQueryResponse& response) override {
+  std::string serializeResponse(const void* response) override {
     std::string ser_res;
-    ser_res.assign((char*)&response, sizeof(ReqQueryResponse));
+    ser_res.assign((char*)response, sizeof(ReqQueryResponse));
+    delete (ReqQueryResponse*)response;
     return ser_res;
   }
 };

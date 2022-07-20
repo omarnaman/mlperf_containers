@@ -8,6 +8,8 @@
 #include <string>
 
 #include "lib/basic.grpc.pb.h"
+#include "models/request_model.h"
+#include "models/model.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -15,12 +17,13 @@ using grpc::ServerContext;
 using grpc::ServerReaderWriter;
 using grpc::Status;
 
-// Logic and data behind the server's behavior.
 class BasicServiceImpl final : public BasicService::Service {
+  public:
+    BasicServiceImpl(BaseModel* model) : model_(model) {}
+  private:
   Status InferenceItem(ServerContext* context, const RequestItem* request,
                        ItemResult* reply) override {
     std::string s = request->items();
-    std::cout << "Got item: " << *(int*)s.data() << std::endl;
     reply->set_results(s.data(), s.size());
     reply->set_id(request->id());
     return Status::OK;
@@ -33,10 +36,10 @@ class BasicServiceImpl final : public BasicService::Service {
     while (stream->Read(&requestItem)) {
       ItemResult itemResult;
       std::string s = requestItem.items();
-      std::cout << "Got item: " << *(int*)s.data()
-                << " with id: " << requestItem.id() << std::endl;
-      itemResult.set_results(s.data(), s.size());
-
+      void* query = model_->parseQuery(requestItem.items(), requestItem.size());
+      std::string response = model_->runQuery(query);
+      itemResult.set_results(response.data(), response.size());
+      itemResult.set_size(response.size());
       itemResult.set_id(requestItem.id());
       stream->Write(itemResult);
     }
@@ -44,14 +47,15 @@ class BasicServiceImpl final : public BasicService::Service {
     return Status::OK;
   }
 
- private:
+  BaseModel* model_;
   std::mutex mt;
 };
 
 void RunServer() {
   std::string server_address("0.0.0.0:50051");
-  BasicServiceImpl service;
-
+  RequestModel* requestModel = new RequestModel();
+  BasicServiceImpl service(requestModel);
+  
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
   ServerBuilder builder;
