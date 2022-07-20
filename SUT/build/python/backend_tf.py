@@ -78,16 +78,25 @@ class BackendTensorflow(backend.Backend):
 
         return items
 
-    def serialize_response(self, res: list) -> bytes:
+    def serialize_response(self, res: np.array) -> bytes:
         """
-        (1,)        float32 number of objects
-        (1, 100, 4) float32 bounding boxes
-        (1, 100)    float32 confidence
-        (1, 100)    float32 classes (labels)
+        (1, 100, 7)
+        100 entries of 7 values:
+        [0, box1, box2, box3, box4, confidence, class]
+        if invalid entry: confidence = 0
+
         """
-        # results = res[0].tobytes() + res[2].tobytes() + res[3].tobytes() + res[1].tobytes()
-        return b""
-        # return results
+        end_res = []
+        print(res[0].shape)
+        for obj in res[0][0]:
+            
+            zero, b1, b2, b3, b4, confidence, class_id = obj
+            
+            if confidence > 0:
+                end_res.append(class_id)
+        end_res = np.array(end_res).astype(np.uint8)
+        return end_res.tobytes()
+
 
     def predict(self, feed):
         return self.sess.run(self.outputs, feed_dict=feed)
