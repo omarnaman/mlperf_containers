@@ -24,7 +24,7 @@ class BackendOnnxruntime(backend.Backend):
         """image_format. For onnx it is always NCHW."""
         return "NCHW"
 
-    def load(self, model_path, inputs=None, outputs=None, threads=0, shape=300):
+    def load(self, model_path, inputs=None, outputs=None, threads=0, shape=300, gpu=False, **kwargs):
         """Load model and find input/outputs from the model file."""
         opt = rt.SessionOptions()
         # enable level 3 optimizations
@@ -33,7 +33,10 @@ class BackendOnnxruntime(backend.Backend):
         # opt.inter_op_num_threads = 1
         opt.log_severity_level = 3
         opt.intra_op_num_threads = threads
-        self.sess = rt.InferenceSession(model_path, opt)
+        providers = None
+        if gpu:
+            providers = ["CUDAExecutionProvider"]
+        self.sess = rt.InferenceSession(model_path, opt, providers=providers)
         # get input and output names
         if not inputs:
             self.inputs = [meta.name for meta in self.sess.get_inputs()]

@@ -65,8 +65,8 @@ def get_backend(backend):
 
 class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
     model = None
-    def __init__(self, backend, model_path, inputs, outputs, threads=0, consumers_per_client=3, model_shape=300) -> None:
-        self.model = backend.load(model_path, inputs=inputs, outputs=outputs, threads=threads, shape=model_shape)
+    def __init__(self, backend, model_path, inputs, outputs, threads=0, consumers_per_client=3, model_shape=300, gpu=False) -> None:
+        self.model = backend.load(model_path, inputs=inputs, outputs=outputs, threads=threads, shape=model_shape, gpu=gpu)
         self.model_path = model_path
         self.backend = backend
         self.outputs = outputs
@@ -162,6 +162,7 @@ def get_args(extra_args: List[str]):
                         help="the number of worker processes allocated by grpc")
     parser.add_argument("--inputs", help="model inputs, comma separated", required=False, default=None)
     parser.add_argument("--outputs", help="model outputs, comma separated", required=False, default='num_detections:0,detection_boxes:0,detection_scores:0,detection_classes:0')
+    parser.add_argument("--gpu", help="use gpu", action="store_true")
     args = parser.parse_args(extra_args)
     if args.model_path is None and args.model is None:
         raise Exception("Either --model-path or --model needs to be provided")
@@ -190,7 +191,7 @@ def serve(extra_args: List[str]):
     print("Listening on [0.0.0.0:8086]...")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=args.worker_threads))
     basic_pb2_grpc.add_BasicServiceServicer_to_server(
-        BasicServiceServicer(backend, model_path, args.inputs, args.outputs, threads=args.model_threads, consumers_per_client=args.consumer_threads, model_shape=args.model_shape), server)
+        BasicServiceServicer(backend, model_path, args.inputs, args.outputs, threads=args.model_threads, consumers_per_client=args.consumer_threads, model_shape=args.model_shape, gpu=args.gpu), server)
     server.add_insecure_port('0.0.0.0:8086')
     server.start()
     server.wait_for_termination()
