@@ -76,7 +76,7 @@ class BasicServiceServicer(basic_pb2_grpc.BasicServiceServicer):
         super().__init__()
 
     def InferenceItem(self, request: basic_pb2.RequestItem, context: grpc.ServicerContext):
-        items = self.backend.parse_query(request.items)
+        items = self.backend.parse_query(request.items, request.preprocessed)
         results = self.model.predict({self.model.inputs[0]: items})
         results = self.backend.serialize_response(results)
         response: basic_pb2.ItemResult = basic_pb2.ItemResult(results=results, id=request.id, size=len(results))

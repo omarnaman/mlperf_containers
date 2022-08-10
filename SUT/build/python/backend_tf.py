@@ -71,7 +71,7 @@ class BackendTensorflow(backend.Backend):
         return self
 
 
-    def parse_query(self, items: bytes) -> np.ndarray:
+    def parse_query(self, items: bytes, preprocessed=True) -> np.ndarray:
 
         items = np.frombuffer(items, np.uint8)
         items.shape = self.shape

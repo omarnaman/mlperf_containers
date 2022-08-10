@@ -7,6 +7,7 @@ onnxruntime backend (https://github.com/microsoft/onnxruntime)
 import backend
 import numpy as np
 import onnxruntime as rt
+import preprocess
 
 
 class BackendOnnxruntime(backend.Backend):
@@ -49,10 +50,12 @@ class BackendOnnxruntime(backend.Backend):
         self.shape = (1, int(shape), int(shape), 3)
         return self
     
-    def parse_query(self, items: bytes) -> np.ndarray:
-        items = np.frombuffer(items, np.uint8)
-        items.shape = self.shape
-
+    def parse_query(self, items: bytes, preprocessed=True) -> np.ndarray:
+        if not preprocessed:
+            items = preprocess.convert_to_np(items)
+        else:
+            items = np.frombuffer(items, np.uint8)
+            items.shape = self.shape
         return items
 
     def serialize_response(self, res: np.ndarray) -> bytes:
