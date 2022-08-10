@@ -7,8 +7,9 @@ service BasicService {
 
 message RequestItem {
     bytes items = 1;
-    uint64 id = 2;
-    uint64 size = 3;
+    bool preprocessed = 2;
+    uint64 id = 3;
+    uint64 size = 4;
 }
 
 message ItemResult {

@@ -194,8 +194,9 @@ class RequestItem final :
 
   enum : int {
     kItemsFieldNumber = 1,
-    kIdFieldNumber = 2,
-    kSizeFieldNumber = 3,
+    kIdFieldNumber = 3,
+    kSizeFieldNumber = 4,
+    kPreprocessedFieldNumber = 2,
   };
   // bytes items = 1;
   void clear_items();
@@ -211,7 +212,7 @@ class RequestItem final :
   std::string* _internal_mutable_items();
   public:
 
-  // uint64 id = 2;
+  // uint64 id = 3;
   void clear_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 id() const;
   void set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -220,13 +221,22 @@ class RequestItem final :
   void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 size = 3;
+  // uint64 size = 4;
   void clear_size();
   ::PROTOBUF_NAMESPACE_ID::uint64 size() const;
   void set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_size() const;
   void _internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // bool preprocessed = 2;
+  void clear_preprocessed();
+  bool preprocessed() const;
+  void set_preprocessed(bool value);
+  private:
+  bool _internal_preprocessed() const;
+  void _internal_set_preprocessed(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:RequestItem)
@@ -239,6 +249,7 @@ class RequestItem final :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr items_;
   ::PROTOBUF_NAMESPACE_ID::uint64 id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 size_;
+  bool preprocessed_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_basic_2eproto;
 };
@@ -755,7 +766,27 @@ inline void RequestItem::set_allocated_items(std::string* items) {
   // @@protoc_insertion_point(field_set_allocated:RequestItem.items)
 }
 
-// uint64 id = 2;
+// bool preprocessed = 2;
+inline void RequestItem::clear_preprocessed() {
+  preprocessed_ = false;
+}
+inline bool RequestItem::_internal_preprocessed() const {
+  return preprocessed_;
+}
+inline bool RequestItem::preprocessed() const {
+  // @@protoc_insertion_point(field_get:RequestItem.preprocessed)
+  return _internal_preprocessed();
+}
+inline void RequestItem::_internal_set_preprocessed(bool value) {
+  
+  preprocessed_ = value;
+}
+inline void RequestItem::set_preprocessed(bool value) {
+  _internal_set_preprocessed(value);
+  // @@protoc_insertion_point(field_set:RequestItem.preprocessed)
+}
+
+// uint64 id = 3;
 inline void RequestItem::clear_id() {
   id_ = uint64_t{0u};
 }
@@ -775,7 +806,7 @@ inline void RequestItem::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:RequestItem.id)
 }
 
-// uint64 size = 3;
+// uint64 size = 4;
 inline void RequestItem::clear_size() {
   size_ = uint64_t{0u};
 }
