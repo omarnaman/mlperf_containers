@@ -55,7 +55,7 @@ class BackendOnnxruntime(backend.Backend):
             items = preprocess.convert_to_np(items)
         else:
             items = np.frombuffer(items, np.uint8)
-            items.shape = self.shape
+        items.shape = self.shape
         return items
 
     def serialize_response(self, res: np.ndarray) -> bytes:
