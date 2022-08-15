@@ -63,10 +63,12 @@ size_t StringDataset::getNumberOfSamples() {
 
 /* Coco Dataset Implementation*/
 #pragma region CocoDataset
-CocoDataset::CocoDataset(std::string& labelsPath, std::string& imageDir) {
+CocoDataset::CocoDataset(std::string& labelsPath, std::string& imageDir, std::string categoriesPath) {
   this->imageDir = imageDir;  // imageDir;
   this->labelsPath = labelsPath;
   this->dataPointPath = new std::vector<std::string>();
+  this->resultsFile.open("results.txt", std::ios::out);
+  this->categoriesPath = categoriesPath;
   loadDataset();
 };
 CocoDataset::~CocoDataset(){};
@@ -92,9 +94,22 @@ size_t CocoDataset::getNumberOfSamples() {
   return dataPoints->size();
 };
 
+void CocoDataset::loadCategories() {
+  std::ifstream file(categoriesPath);
+  std::string line;
+  if(!file.is_open()) {
+    std::cerr << "Categories file could not be opened\n";
+    return;
+  }
+  while (std::getline(file, line)) {
+    categories.push_back(line);
+  }
+}
+
 void CocoDataset::loadDataset() {
   char tmp[1000];
   getcwd(tmp, 999);
+  loadCategories();
   std::ifstream labels_file, image_file;
   std::map<std::string, std::string> labels_map;
   labels_file.open(labelsPath, std::ios::in);
@@ -156,9 +171,11 @@ void CocoDataset::postProcess(const char* data, size_t size, const char* label) 
   int8_t* data_ptr = (int8_t*)data;
   size_t number_of_detected_objects = size;
   this->resultsFile << label << std::endl;
-  for (size_t i = 0; i < number_of_detected_objects; i++) {
-    assert(data_ptr[i] <= categories.size() && data_ptr[i] > 0);
-    this->resultsFile << (int)data_ptr[i] << " ";
+  if(!this->categories.size() == 0) {
+    for (size_t i = 0; i < number_of_detected_objects; i++) {
+      assert(data_ptr[i] <= categories.size() && data_ptr[i] > 0);
+      this->resultsFile << (int)data_ptr[i] << " ";
+    }
   }
   delete[] data;
   this->resultsFile << std::endl;

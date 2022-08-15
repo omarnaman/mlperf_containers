@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <fstream>
 #include <vector>
 #include "../c_loadgen/dataset.h"
 
@@ -40,13 +41,17 @@ class CocoDataset : public mlperf::Dataset {
   std::string imageDir = "coco/images/";
   std::vector<std::string> listDir(const std::string& dir_path);
   std::vector<std::string>* dataPointPath;
+  std::vector<std::string> categories;
+  std::ofstream resultsFile;
+  std::string categoriesPath;
 
  public:
-  CocoDataset(std::string& labels_path, std::string& image_dir);
+  CocoDataset(std::string& labels_path, std::string& image_dir, std::string categoriesPath={});
   ~CocoDataset();
 
   void loadDataset() override;
   void loadSamples(const std::vector<size_t>& samples) override;
+  void loadCategories();
   mlperf::Data* getSample(const int& index) override;
   void postProcess(const char* data, size_t size, const char* label) override;
   size_t getNumberOfSamples() override;
