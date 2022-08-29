@@ -86,7 +86,7 @@ RUN cd /workspace/loadgen/build/cppimp && \
 
 COPY common/setup_tc.sh /workspace/loadgen/build/
 COPY loadgen/build/store_results.py /workspace/loadgen/build/
-COPY loadgen/build/run_loadgen_cpp.sh /workspace/loadgen/build/
+COPY loadgen/build/run_loadgen_server.sh /workspace/loadgen/build/
 
 # Install aws
 RUN apt-get update && \
