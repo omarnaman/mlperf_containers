@@ -17,7 +17,7 @@ def download_dataset(url):
 
 
 # Experiment_name Selector SUT_address Storage_address File_storage_address Config_ID Dataset_URL Scenario
-@app.route('/run_expriement', methods=['POST'])
+@app.route('/run_experiment', methods=['POST'])
 def start_lg():
     global DATASET_URL
     json_data = flask.request.get_json()
