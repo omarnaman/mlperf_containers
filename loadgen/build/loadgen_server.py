@@ -48,15 +48,18 @@ def start_lg():
     return {"eid": eid, "selector": selector}
 
 
+import time
+import signal
 def shutdown_server():
-    func = flask.request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
+    pid = os.getpid()
+    time.sleep(0.5)
+    os.kill(pid, signal.SIGINT)
+
 @app.route('/stop', methods=['POST'])
 def exit_flask():
-    shutdown_server()
-    return "Shutting Down"
+    import threading
+    threading.Thread(target=shutdown_server).start()
+    return "", 200
 
 if __name__=="__main__":
     app.run(host='0.0.0.0', port=8088, debug=True)
