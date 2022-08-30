@@ -20,19 +20,21 @@ RequestData* BasicServiceClient::predict(const char* items, const size_t size,
   RequestItem request;
   request.set_items((char*)items, size);
   request.set_id(id);
+  request.set_size(size);
+
   ItemResult reply;
 
   ClientContext context;
   auto deadline = std::chrono::system_clock::now() +
       std::chrono::milliseconds(700);
-  context.set_deadline(deadline);
+  // context.set_deadline(deadline);
   Status status = stub_->InferenceItem(&context, request, &reply);
   if (status.ok()) {
     std::string results_items = reply.results();
-    size_t size = results_items.size();
+    size_t size = reply.size();
     RequestData* r = new RequestData();
     r->items = new char[size];
-    memcpy(r->items, results_items.data(), size);
+    memcpy((void*) r->items, results_items.data(), size);
     r->size = size;
     r->id = reply.id();
     assert(r->id == id);
