@@ -41,8 +41,7 @@ def start_lg():
     # cd cppimp/build && ./loadgen $scenario $sut_address
     os.system(f'cd cppimp/build && ./loadgen {scenario} {sut_address}')
     # cd ../../ && python3 store_results.py "$eid" "$selector" "$output" "http://$storage_address"
-    os.system(f'python3 store_results.py {experiment_name} {sut_address} {output} {storage_address}')
-
+    storage_address = f"http://{storage_address}"
     qps, latencies = store_results.process_summary(output)
     store_results.upload_qps(eid, selector, qps, storage_address)
     store_results.upload_latencies(eid, selector, latencies, storage_address)
