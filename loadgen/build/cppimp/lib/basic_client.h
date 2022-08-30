@@ -19,7 +19,7 @@ using grpc::ClientReaderWriter;
 using grpc::Status;
 
 struct RequestData{
-  char* items;
+  const char* items;
   size_t size;
   uintptr_t id;
 };
