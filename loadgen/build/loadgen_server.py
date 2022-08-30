@@ -3,7 +3,7 @@
 import flask
 import os
 import sys
-
+import pathlib
 import store_results
 
 app = flask.Flask(__name__)
@@ -11,7 +11,7 @@ app = flask.Flask(__name__)
 DATASET_URL = ''
 # aws s3 cp "$dataset_URL" cppimp/build/dataset.tar.gz && \
 # tar -xzf cppimp/build/dataset.tar.gz -C cppimp/build/
-
+# TODO: clean old dataset to avoid mixing old and new datasets
 def download_dataset(url):
     os.system(f'aws s3 cp {url} cppimp/build/dataset.tar.gz && tar -xzf cppimp/build/dataset.tar.gz -C cppimp/build/')
 
@@ -45,6 +45,7 @@ def start_lg():
     qps, latencies = store_results.process_summary(output)
     store_results.upload_qps(eid, selector, qps, storage_address)
     store_results.upload_latencies(eid, selector, latencies, storage_address)
+    return {"eid": eid, "selector": selector}
 
 
 def shutdown_server():
