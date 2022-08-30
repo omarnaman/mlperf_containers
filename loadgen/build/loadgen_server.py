@@ -47,10 +47,16 @@ def start_lg():
     store_results.upload_qps(eid, selector, qps, storage_address)
     store_results.upload_latencies(eid, selector, latencies, storage_address)
 
-@app.route('/stop')
-def exit_flask():
-    sys.exit(0)
 
+def shutdown_server():
+    func = flask.request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+@app.route('/stop', methods=['POST'])
+def exit_flask():
+    shutdown_server()
+    return "Shutting Down"
 
 if __name__=="__main__":
-    app.run(host='0.0.0.0', port=8088)
+    app.run(host='0.0.0.0', port=8088, debug=True)
