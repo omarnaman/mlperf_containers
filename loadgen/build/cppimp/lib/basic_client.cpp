@@ -78,6 +78,8 @@ void BasicServiceClientStreamer::sendRequests() {
     RequestItem requestItem;
     requestItem.set_items(items, size);
     requestItem.set_id(id);
+    requestItem.set_size(size);
+    requestItem.set_preprocessed(true);
     stream->Write(requestItem);
   }
 }
@@ -100,7 +102,7 @@ void BasicServiceClientStreamer::receiveResponse() {
   while (stream->Read(&itemResult)) {
     std::lock_guard<std::mutex> lk(responseMt);
     responseQueue.push(
-        RequestData{.items = NULL, .size = 0, .id = itemResult.id()});
+        RequestData{.items = itemResult.results().data(), .size = itemResult.size(), .id = itemResult.id()});
     responsePushed.notify_one();
   }
 }
@@ -109,7 +111,6 @@ RequestData BasicServiceClientStreamer::getResponse() {
   std::unique_lock<std::mutex> lk(responseMt);
   responsePushed.wait(lk, [this]() { return this->hasResponses(); });
   RequestData responseData = responseQueue.front();
-  std::cout << "received Item with id: " << responseData.id << std::endl;
 
   responseQueue.pop();
   return responseData;
