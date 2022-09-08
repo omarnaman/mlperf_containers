@@ -58,6 +58,9 @@ def get_backend(backend):
     elif backend == "uspp":
         from backend_uspp import BackendUSPP
         backend = BackendUSPP()
+    elif backend == "spacy":
+        from backend_spacy import BackendSpaCy
+        backend = BackendSpaCy()
     else:
         raise ValueError("unknown backend: " + backend)
     return backend
