@@ -29,6 +29,7 @@ TestScenario GetScenario(std::string& string_scenario) {
   } else if (!string_scenario.compare("Offline")) {
     return TestScenario::Offline;
   }
+  return TestScenario::SingleStream;
 }
 
 int main(int args, char** argv) {
