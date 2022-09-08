@@ -99,4 +99,5 @@ class BackendTensorflow(backend.Backend):
 
 
     def predict(self, feed):
+        feed = {self.inputs[0]: feed}
         return self.sess.run(self.outputs, feed_dict=feed)

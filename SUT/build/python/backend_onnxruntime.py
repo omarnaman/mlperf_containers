@@ -70,4 +70,5 @@ class BackendOnnxruntime(backend.Backend):
 
     def predict(self, feed):
         """Run the prediction."""
+        feed = {self.inputs[0]: feed}
         return self.sess.run(self.outputs, feed)
