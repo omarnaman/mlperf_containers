@@ -37,7 +37,7 @@ class IOModel : public BaseModel {
   }
   std::string runQuery(const void* queryParameters) override {
     const IOQueryParam* params = (IOQueryParam*)queryParameters;
-    int out = open("tmpfile", O_SYNC | O_TRUNC | O_CREAT | O_WRONLY);
+    int out = open("tmpfile", O_SYNC | O_TRUNC | O_CREAT | O_WRONLY, 0600);
     assert(out > 0);
     size_t written_bytes = 0;
     ssize_t written = 0;
