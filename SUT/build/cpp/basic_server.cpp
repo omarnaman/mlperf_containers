@@ -6,9 +6,13 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <stdlib.h>
 
 #include "lib/basic.grpc.pb.h"
 #include "models/request_model.h"
+#include "models/io_model.h"
+#include "models/cpu_model.h"
+
 #include "models/model.h"
 
 using grpc::Server;
@@ -51,11 +55,31 @@ class BasicServiceImpl final : public BasicService::Service {
   std::mutex mt;
 };
 
-void RunServer() {
-  std::string server_address("0.0.0.0:50051");
-  RequestModel* requestModel = new RequestModel();
-  BasicServiceImpl service(requestModel);
+
+
+void RunServer(int modelType) {
+  std::string server_address("0.0.0.0:8086");
   
+  BaseModel* model = NULL;
+  switch (modelType) {
+    case 0:
+      model = new RequestModel();
+      break;
+    case 1:
+      model = new IOModel();
+      break;
+    case 2:
+      model = new CPUModel();
+      break;
+    default:
+      std::cout << "Invalid model type" << std::endl;
+      exit(1);
+  }
+
+  BasicServiceImpl service(model);
+  
+
+
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
   ServerBuilder builder;
@@ -74,7 +98,13 @@ void RunServer() {
 }
 
 int main(int argc, char** argv) {
-  RunServer();
+  
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " 0(Request)|1(IO)|2(CPU)" << std::endl;
+    exit(1);    
+  }
+  int modelType = atoi(argv[1]);
+  RunServer(modelType);
 
   return 0;
 }
