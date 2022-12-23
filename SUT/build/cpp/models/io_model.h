@@ -37,7 +37,19 @@ class IOModel : public BaseModel {
   }
   std::string runQuery(const void* queryParameters) override {
     const IOQueryParam* params = (IOQueryParam*)queryParameters;
-    int out = open("tmpfile", O_SYNC | O_TRUNC | O_CREAT | O_WRONLY, 0600);
+    int flags = O_TRUNC | O_TMPFILE | O_WRONLY;
+    if (params->fsync) {
+      flags |= O_SYNC;
+    }
+    int out = open(".", flags, 0600);
+    if (out == -1) {
+      std::cout << "Error opening file: " << strerror(errno) << std::endl;
+      IOQueryResponse* response = new IOQueryResponse;
+      response->error_code = errno;
+      response->time_taken = 0;
+      delete params;
+      return serializeResponse(response);
+    }
     assert(out > 0);
     size_t written_bytes = 0;
     ssize_t written = 0;
@@ -45,10 +57,7 @@ class IOModel : public BaseModel {
     while (written_bytes < params->file_size) {
       size_t to_write = std::min(params->file_size - written_bytes, params->burst_size);
 
-      if (params->fsync) {
-        written = write(out, data, to_write);
-        assert(written > 0);
-      }
+      written = write(out, data, to_write);
       written_bytes += written;
     }
 
@@ -56,6 +65,7 @@ class IOModel : public BaseModel {
     IOQueryResponse* response = new IOQueryResponse;
     response->error_code = 0;
     response->time_taken = 0;
+    close(out);
     delete params;
     return serializeResponse(response);
   }
