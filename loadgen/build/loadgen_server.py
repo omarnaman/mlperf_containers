@@ -30,6 +30,7 @@ def start_lg():
     config_id = json_data['config_id']
     dataset_url = json_data['dataset_url']
     scenario = json_data['scenario']
+    args = json_data.get('args', [])
     output=os.path.join(os.getcwd(), "cppimp/build")
 
     os.system(f'wget "http://{file_storage_address}/{config_id}" --output-document=cppimp/build/mlperf.conf')
@@ -39,7 +40,7 @@ def start_lg():
         DATASET_URL = dataset_url
 
     # cd cppimp/build && ./loadgen $scenario $sut_address
-    os.system(f'cd cppimp/build && ./loadgen {scenario} {sut_address}')
+    os.system(f'cd cppimp/build && ./loadgen {scenario} {sut_address} {" ".join(args)}')
     # cd ../../ && python3 store_results.py "$eid" "$selector" "$output" "http://$storage_address"
     storage_address = f"http://{storage_address}"
     qps, latencies = store_results.process_summary(output)
